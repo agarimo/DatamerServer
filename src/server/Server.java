@@ -1,5 +1,7 @@
 package server;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -7,6 +9,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import server.task.TaskDownload;
+import util.Dates;
 
 /**
  *
@@ -31,6 +35,15 @@ public class Server extends Application {
         
         stage.setScene(scene);
         stage.show();
+        
+        LocalDate fecha = LocalDate.now();
+//        fecha=fecha.plusDays(1);
+        
+        
+        TaskDownload task = new TaskDownload(fecha);
+        
+        
+        new Thread(task).start();
     }
 
     /**
