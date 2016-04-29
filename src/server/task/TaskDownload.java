@@ -7,14 +7,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.concurrent.Task;
+import server.Var;
 import server.download.Boletin;
 import server.download.Publicacion;
+import sql.Sql;
 
 /**
  *
@@ -28,7 +34,8 @@ public class TaskDownload extends Task {
     private double val;
     private String status;
 
-    List<Publicacion> boe;
+    private List<Publicacion> boe;
+    private Sql bd;
 
     public TaskDownload() {
         this.fecha = LocalDate.now();
@@ -43,31 +50,31 @@ public class TaskDownload extends Task {
     }
 
     @Override
-    protected Object call() throws Exception {
+    protected Object call() {
         this.updateMessage("Cargando BOLETINES");
         val = 1;
         boe = splitUrl(getUrl(generaLink()));
-        //Buscar posibles duplicados ya insertados en la DB.
-      
+
+        conectar();
+        duplicados();
 
         boe.stream().forEach((aux) -> {
             status = val + " de " + boe.size();
             this.updateProgress(val, boe.size());
-            
+
             if (descarga(aux.getLink())) {
-                this.updateMessage("Updating "+status);
+                this.updateMessage("Updating " + status);
                 LoadFile lf = new LoadFile(txt);
                 aux.setCve(getCve(lf.getLineas()));
-                
-                //crear Método en LoadFile para extraer el texto completo y limpio.
-                //aux.setDatos(lf.getLineas());
+                aux.setDatos(lf.getFileData());
             } else {
                 aux.setCve("No disponible");
+                aux.setDatos("No disponible");
             }
-            
-            //INSERT EN DB;
-        });
 
+            insert(aux);
+        });
+        desconectar();
         clean();
         return null;
     }
@@ -197,6 +204,50 @@ public class TaskDownload extends Task {
     }
 
 //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="INSERCIÓN EN DB">
+    private boolean conectar() {
+        try {
+            bd = new Sql(Var.con);
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+
+    private boolean desconectar() {
+        try {
+            bd.close();
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+
+    private void duplicados() {
+        try {
+            List duplicados = bd.getStringList("SELECT codigo FROM " + Var.dbName + ".publicacion");
+
+            boe.stream().forEach((aux) -> {
+                if (duplicados.contains(aux.getCodigo())) {
+                    boe.remove(aux);
+                }
+            });
+        } catch (SQLException ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private boolean insert(Publicacion aux) {
+        try {
+            bd.ejecutar(aux.SQLCrear());
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
 //</editor-fold>
 }
