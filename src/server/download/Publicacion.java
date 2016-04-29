@@ -140,20 +140,20 @@ public class Publicacion {
     
     public String SQLCrear() {
         return "INSERT into " + Var.dbName + ".publicacion (fecha,codigo,entidad,origen,descripcion,datos,link,cve,selected,status) values("
-                + Varios.entrecomillar(this.fecha.format(DateTimeFormatter.ISO_LOCAL_DATE)) + ","
-                + Varios.entrecomillar(this.codigo) + ","
-                + Varios.entrecomillar(this.entidad) + ","
-                + Varios.entrecomillar(this.origen) + ","
-                + Varios.entrecomillar(this.descripcion) + ","
-                + Varios.entrecomillar(this.datos) + ","
-                + Varios.entrecomillar(this.link) + ","
-                + Varios.entrecomillar(this.cve) + ","
+                + Varios.comillas(this.fecha.format(DateTimeFormatter.ISO_LOCAL_DATE)) + ","
+                + Varios.comillas(this.codigo) + ","
+                + Varios.comillas(this.entidad) + ","
+                + Varios.comillas(this.origen) + ","
+                + Varios.comillas(this.descripcion) + ","
+                + Varios.comillas(this.datos) + ","
+                + Varios.comillas(this.link) + ","
+                + Varios.comillas(this.cve) + ","
                 + this.selected + ","
-                + Varios.entrecomillar(this.status.toString())
+                + Varios.comillas(this.status.toString())
                 + ");";
     }
 
     public String SQLBuscar() {
-        return "SELECT * FROM " + Var.dbName + ".publicacion WHERE codigo=" + Varios.entrecomillar(this.codigo);
+        return "SELECT * FROM " + Var.dbName + ".publicacion WHERE codigo=" + Varios.comillas(this.codigo);
     }
 }
