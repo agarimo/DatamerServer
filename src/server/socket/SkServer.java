@@ -10,14 +10,14 @@ import java.util.logging.Logger;
  *
  * @author Agárimo
  */
-public class Server implements Runnable {
+public class SkServer implements Runnable {
 
     private ServerSocket servidor;
     
     private final int puerto;
     private boolean run;
     
-    public Server(int puerto){
+    public SkServer(int puerto){
         this.puerto=puerto;
         this.run=true;
     }
@@ -30,6 +30,7 @@ public class Server implements Runnable {
     public void run() {
         
         try {
+            System.out.println("SERVER----INICIANDO SERVIDOR");
             servidor = new ServerSocket(puerto);
             
             while(run){
@@ -41,7 +42,7 @@ public class Server implements Runnable {
             servidor.close();
             
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SkServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
