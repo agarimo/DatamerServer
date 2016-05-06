@@ -1,8 +1,7 @@
 package server;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -10,20 +9,25 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import server.client.ClientSocket;
-import server.socket.Request;
+import server.socket.ClientSocket;
 import server.socket.SkServer;
-import server.task.TaskDownload;
+import socket.enty.Request;
+import socket.enty.Response;
+import socket.enty.ServerRequest;
+import socket.enty.ServerTask;
 
 /**
  *
  * @author agari
  */
 public class Server extends Application {
+    
+    private static SkServer server;
 
     @Override
     public void init() {
         Var.initVar();
+        initServer();
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
@@ -48,23 +52,29 @@ public class Server extends Application {
 //        launch(args);
         test();
     }
+    
+    private static void initServer(){
+        server = new SkServer(Var.serverPort);
+        new Thread(server).start();
+    }
 
     public static void test() {
         Var.initVar();
+        initServer();
 
-        SkServer server = new SkServer(10987);
-        new Thread(server).start();
-        
-        Request request = new Request();
-        request.setTipo("END");
-        List aux = new ArrayList();
-        aux.add("Un parametro");
-        aux.add(123);
-        request.setParametros(aux);
-        
-        ClientSocket client = new ClientSocket(request);
-        new Thread(client).start();
-            
+        ClientSocket client = new ClientSocket();
+
+        client.conect();
+
+        Request request = new Request(ServerRequest.RUN_TASK);
+        request.getParametros().add(ServerTask.FASES);
+        request.getParametros().add(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+
+        System.out.println("CLIENT--Envia peticion");
+        Response res = client.sendRequest(request);
+        System.out.println("CLIENT--Lee Respuesta");
+        System.out.println(res);
+        client.disconect();
         
     }
 }

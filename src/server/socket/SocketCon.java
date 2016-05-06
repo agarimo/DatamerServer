@@ -4,17 +4,19 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import socket.enty.Request;
+import socket.enty.Response;
+import socket.enty.ServerResponse;
+import socket.enty.ServerTask;
 
 /**
  *
  * @author Agárimo
  */
 public class SocketCon implements Runnable {
-
+    
     private final Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
@@ -47,8 +49,6 @@ public class SocketCon implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("SERVER----CLIENTE ACEPTADO");
-
         while (run) {
             try {
                 request = (Request) in.readObject();
@@ -56,13 +56,8 @@ public class SocketCon implements Runnable {
                 if (processRequest()) {
                     out.writeObject(this.response);
                 } else {
-                    String str = "ERROR";
-                    List list = new ArrayList();
-                    list.add("ERROR WHILE PROCESSING REQUEST");
-
-                    response = new Response();
-                    response.setStatus(str);
-                    response.setParametros(list);
+                    response = new Response(ServerResponse.ERROR);
+                    response.getParametros().add("ERROR PROCESANDO EL REQUEST");
                     out.writeObject(response);
                 }
 
@@ -71,25 +66,36 @@ public class SocketCon implements Runnable {
             }
         }
         desconectar();
-        System.out.println("SERVER----CLIENTE DESCONECTADO");
     }
 
     private boolean processRequest() {
-        response = new Response();
 
-        if (this.request.getTipo().equalsIgnoreCase("END")) {
-            run = false;
-            response.setStatus("DONE");
-            response.setParametros(null);
-        } else {
-            response.setStatus("OK");
-            List aux = new ArrayList();
-            aux.add("asdf");
-            aux.add(112);
-            response.setParametros(aux);
+        switch (request.getRequest()) {
+            case CONNECT:
+                response = new Response(ServerResponse.CONECTED);
+                break;
+            case DISCONECT:
+                run = false;
+                response = new Response(ServerResponse.DISCONECTED);
+                break;
+
+            case STATUS:
+
+                break;
+
+            case RUN_TASK:
+                ServerTask st=  (ServerTask) request.getParametros().get(0);
+                String param = (String) request.getParametros().get(1);
+                response = new Response(ServerResponse.OK);
+                response.getParametros().add(st);
+                response.getParametros().add(param);
+                break;
+            default:
+                response = new Response(ServerResponse.ERROR);
+                response.getParametros().add("Error en SWITCH de processRequest()");
+                break;
         }
 
         return true;
     }
-
 }

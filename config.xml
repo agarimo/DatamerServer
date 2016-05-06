@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Archivo de propiedades XML de Datamer_server</comment>
+<entry key="con_user">admin</entry>
+<entry key="con_port">3306</entry>
+<entry key="dbName">server</entry>
+<entry key="con_pass">IkuinenK@@m.s84</entry>
+<entry key="con_host">192.168.1.40</entry>
+<entry key="server_port">10987</entry>
+</properties>

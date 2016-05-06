@@ -25,12 +25,15 @@ public class SkServer implements Runnable {
     public void desconectar(){
         this.run=false;
     }
+    
+    public boolean isRunning(){
+        return this.run;
+    }
 
     @Override
     public void run() {
         
         try {
-            System.out.println("SERVER----INICIANDO SERVIDOR");
             servidor = new ServerSocket(puerto);
             
             while(run){
@@ -42,6 +45,7 @@ public class SkServer implements Runnable {
             servidor.close();
             
         } catch (IOException ex) {
+            run=false;
             Logger.getLogger(SkServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
