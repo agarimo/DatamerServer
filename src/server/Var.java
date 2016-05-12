@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import server.socket.SkServer;
+import server.task.Tasker;
 import sql.Conexion;
 
 /**
@@ -22,17 +23,27 @@ public class Var {
     public static Conexion con;
     public static String dbName;
 
+    public static SkServer server;
     public static int serverPort;
     
-    public static SkServer server;
+    public static Tasker tasker;
+    public static int horaExec;
+    public static int minExec;
+    public static int delayExec;
 
     public static void initVar() {
         loadConfig();
         initVarDriver();
         initConnection();
-        
+
         dbName = config.getProperty("dbName");
         serverPort = Integer.parseInt(config.getProperty("server_port"));
+        horaExec = Integer.parseInt(config.getProperty("hora_exec"));
+        minExec = Integer.parseInt(config.getProperty("min_exec"));
+        delayExec = Integer.parseInt(config.getProperty("delay_exec"));
+        
+        
+        
     }
 
     private static void initVarDriver() {

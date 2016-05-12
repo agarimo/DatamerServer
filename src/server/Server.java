@@ -1,6 +1,8 @@
 package server;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,8 +11,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import static server.Var.tasker;
 import server.socket.ClientSocket;
 import server.socket.SkServer;
+import server.task.Tasker;
 import socket.enty.Request;
 import socket.enty.Response;
 import socket.enty.ServerRequest;
@@ -51,16 +55,25 @@ public class Server extends Application {
     public static void main(String[] args) {
 //        launch(args);
         test();
+        
     }
     
     private static void initServer(){
+        System.out.println("Iniciando SERVER");
         server = new SkServer(Var.serverPort);
         new Thread(server).start();
+    }
+    
+    private static void initTasker(){
+        System.out.println("Iniciando TASKER");
+        tasker = new Tasker();
+        tasker.initRutina();
     }
 
     public static void test() {
         Var.initVar();
         initServer();
+        initTasker();
 
         ClientSocket client = new ClientSocket();
 

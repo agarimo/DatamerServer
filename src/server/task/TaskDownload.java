@@ -15,17 +15,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.concurrent.Task;
 import server.Var;
 import server.download.Boletin;
 import server.download.Publicacion;
+import socket.enty.ModeloTarea;
 import sql.Sql;
 
 /**
  *
  * @author Agárimo
  */
-public class TaskDownload extends Task {
+public class TaskDownload extends Tarea {
 
     private final LocalDate fecha;
     private final File pdf;
@@ -36,13 +36,15 @@ public class TaskDownload extends Task {
     private List<Publicacion> boe;
     private Sql bd;
 
-    public TaskDownload() {
+    public TaskDownload(ModeloTarea modeloTarea) {
+        super(modeloTarea);
         this.fecha = LocalDate.now();
         pdf = new File(new File("data"), "dwl.pdf");
         txt = new File(new File("data"), "dwl.txt");
     }
 
-    public TaskDownload(LocalDate fecha) {
+    public TaskDownload(LocalDate fecha, ModeloTarea modeloTarea) {
+        super(modeloTarea);
         this.fecha = fecha;
         pdf = new File(new File("data"), "dwl.pdf");
         txt = new File(new File("data"), "dwl.txt");
@@ -50,7 +52,9 @@ public class TaskDownload extends Task {
 
     @Override
     protected Object call() {
+        System.out.println("Me ejecutoooo DOWNLOAD");
         this.updateMessage("Cargando BOLETINES");
+        this.tarea.setProgreso(this.getMessage());
         val = 1;
         boe = splitUrl(getUrl(generaLink()));
 
@@ -60,9 +64,11 @@ public class TaskDownload extends Task {
         boe.stream().forEach((aux) -> {
             status = val + " de " + boe.size();
             this.updateProgress(val, boe.size());
+            this.tarea.setPorcentaje(Double.toString(this.getProgress())+" %");
 
             if (descarga(aux.getLink())) {
                 this.updateMessage("Updating " + status);
+                this.tarea.setProgreso(this.getMessage());
                 LoadFile lf = new LoadFile(txt);
                 aux.setCve(getCve(lf.getLineas()));
                 aux.setDatos(lf.getFileData());
@@ -73,6 +79,7 @@ public class TaskDownload extends Task {
 
             insert(aux);
         });
+        
         desconectar();
         clean();
         return null;
@@ -80,6 +87,7 @@ public class TaskDownload extends Task {
 
     private void clean() {
         this.updateMessage("Finalizando proceso");
+        this.tarea.setProgreso(this.getMessage());
         pdf.delete();
         txt.delete();
     }
