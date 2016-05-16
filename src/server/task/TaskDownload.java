@@ -1,8 +1,13 @@
 package server.task;
 
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.parser.PdfTextExtractor;
 import files.LoadFile;
+import files.Util;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -15,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import server.Var;
 import server.download.Boletin;
 import server.download.Publicacion;
@@ -39,55 +45,79 @@ public class TaskDownload extends Tarea {
     public TaskDownload(ModeloTarea modeloTarea) {
         super(modeloTarea);
         this.fecha = LocalDate.now();
-        pdf = new File(new File("data"), "dwl.pdf");
-        txt = new File(new File("data"), "dwl.txt");
+        pdf = new File(Var.fileSystem, "dwl.pdf");
+        txt = new File(Var.fileSystem, "dwl.txt");
+
     }
 
     public TaskDownload(LocalDate fecha, ModeloTarea modeloTarea) {
         super(modeloTarea);
         this.fecha = fecha;
-        pdf = new File(new File("data"), "dwl.pdf");
-        txt = new File(new File("data"), "dwl.txt");
+        pdf = new File(Var.fileSystem, "dwl.pdf");
+        txt = new File(Var.fileSystem, "dwl.txt");
+
     }
 
     @Override
     protected Object call() {
-        System.out.println("Me ejecutoooo DOWNLOAD");
-        this.updateMessage("Cargando BOLETINES");
-        this.tarea.setProgreso(this.getMessage());
-        val = 1;
-        boe = splitUrl(getUrl(generaLink()));
+        try {
+            System.out.println("Iniciando Download");
 
-        conectar();
-        duplicados();
-
-        boe.stream().forEach((aux) -> {
-            status = val + " de " + boe.size();
-            this.updateProgress(val, boe.size());
-            this.tarea.setPorcentaje(Double.toString(this.getProgress())+" %");
-
-            if (descarga(aux.getLink())) {
-                this.updateMessage("Updating " + status);
+            Platform.runLater(() -> {
+                this.updateMessage("Cargando BOLETINES");
                 this.tarea.setProgreso(this.getMessage());
-                LoadFile lf = new LoadFile(txt);
-                aux.setCve(getCve(lf.getLineas()));
-                aux.setDatos(lf.getFileData());
-            } else {
-                aux.setCve("No disponible");
-                aux.setDatos("No disponible");
-            }
+            });
 
-            insert(aux);
-        });
-        
-        desconectar();
-        clean();
+            val = 1;
+            boe = splitUrl(getUrl(generaLink()));
+
+            conectar();
+            duplicados();
+
+            boe.stream().forEach((aux) -> {
+                status = val + " de " + boe.size();
+                status = status.replace(".0", "");
+                System.out.println(status);
+
+                Platform.runLater(() -> {
+                    this.updateProgress(val, boe.size());
+                    this.tarea.setPorcentaje(Double.toString(this.getProgress()) + " %");
+                });
+
+                if (descarga(aux.getLink())) {
+
+                    Platform.runLater(() -> {
+                        this.updateMessage("Updating " + status);
+                        this.tarea.setProgreso(this.getMessage());
+                    });
+
+                    LoadFile lf = new LoadFile(txt);
+                    aux.setCve(getCve(lf.getLineas()));
+                    aux.setDatos(lf.getFileData());
+                } else {
+                    aux.setCve("No disponible");
+                    aux.setDatos("No disponible");
+                }
+
+                insert(aux);
+                val++;
+            });
+
+            desconectar();
+            clean();
+            System.out.println("Finalizado Descarga");
+        } catch (Exception ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return null;
     }
 
     private void clean() {
-        this.updateMessage("Finalizando proceso");
-        this.tarea.setProgreso(this.getMessage());
+        Platform.runLater(() -> {
+            this.updateMessage("Finalizando proceso");
+            this.tarea.setProgreso(this.getMessage());
+        });
+
         pdf.delete();
         txt.delete();
     }
@@ -170,8 +200,8 @@ public class TaskDownload extends Tarea {
 
             if (a1.contains("</ul>")) {
                 print = false;
-                boletin.setDatos(sb1.toString());
                 boletin.setEntidad(entidad);
+                boletin.setDatos(sb1.toString());
                 aux.addAll(boletin.getPublicaciones());
                 boletin = new Boletin(this.fecha);
                 sb1 = new StringBuilder();
@@ -184,12 +214,20 @@ public class TaskDownload extends Tarea {
     //<editor-fold defaultstate="collapsed" desc="DESCARGA">
     private boolean descarga(String link) {
         try {
-            this.updateMessage("Downloading " + status);
+            Platform.runLater(() -> {
+                this.updateMessage("Downloading " + status);
+            });
+
             files.Download.downloadFILE(link, pdf);
-            this.updateMessage("Parsing " + status);
-            files.Pdf.convertPDF(pdf, txt);
+
+            Platform.runLater(() -> {
+                this.updateMessage("Parsing " + status);
+            });
+
+            convertPDF(pdf, txt);
             return true;
-        } catch (Exception e) {
+        } catch (Exception ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }
@@ -203,17 +241,41 @@ public class TaskDownload extends Tarea {
 
             if (aux.contains("cve: BOE-N-")) {
                 aux = aux.replace("cve: ", "").trim();
-                System.out.println(aux);
                 break;
             }
         }
         return aux;
     }
 
+    private void convertPDF(File origen, File destino) throws IOException {
+        destino.createNewFile();
+
+        FileWriter fw = new FileWriter(destino.getAbsolutePath());
+        BufferedWriter bw = new BufferedWriter(fw);
+        PdfReader pr = new PdfReader(origen.getAbsolutePath());
+        int pNum = pr.getNumberOfPages();
+        for (int page = 1; page <= pNum; page++) {
+            String text = PdfTextExtractor.getTextFromPage(pr, page);
+            bw.write(text);
+            bw.newLine();
+        }
+        bw.flush();
+        bw.close();
+        fw.close();
+        pr.close();
+
+        convertPDFFixFile(destino);
+    }
+
+    private void convertPDFFixFile(File txt) {
+        String datos = Util.leeArchivo(txt);
+        Util.escribeArchivo(txt, datos);
+    }
 //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="INSERCIÓN EN DB">
     private boolean conectar() {
+        System.out.println("Conectando");
         try {
             bd = new Sql(Var.con);
             return true;
@@ -235,25 +297,31 @@ public class TaskDownload extends Tarea {
 
     private void duplicados() {
         try {
+            Publicacion aux;
+            List clear = new ArrayList();
             List duplicados = bd.getStringList("SELECT codigo FROM " + Var.dbName + ".publicacion");
+            Iterator<Publicacion> it = boe.iterator();
 
-            boe.stream().forEach((aux) -> {
-                if (duplicados.contains(aux.getCodigo())) {
-                    boe.remove(aux);
+            while (it.hasNext()) {
+                aux = it.next();
+
+                if (!duplicados.contains(aux.getCodigo())) {
+                    clear.add(aux);
                 }
-            });
+            }
+
+            boe.clear();
+            boe.addAll(clear);
         } catch (SQLException ex) {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private boolean insert(Publicacion aux) {
+    private void insert(Publicacion aux) {
         try {
             bd.ejecutar(aux.SQLCrear());
-            return true;
         } catch (SQLException ex) {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
         }
     }
 //</editor-fold>

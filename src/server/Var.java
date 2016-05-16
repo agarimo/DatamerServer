@@ -1,5 +1,6 @@
 package server;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,6 +20,8 @@ import sql.Conexion;
 public class Var {
 
     private static Properties config;
+    
+    public static File fileSystem;
 
     public static Conexion con;
     public static String dbName;
@@ -35,6 +38,10 @@ public class Var {
         loadConfig();
         initVarDriver();
         initConnection();
+        
+        fileSystem = new File("data");
+        fileSystem.mkdirs();
+        
 
         dbName = config.getProperty("dbName");
         serverPort = Integer.parseInt(config.getProperty("server_port"));

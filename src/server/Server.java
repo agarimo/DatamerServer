@@ -1,5 +1,8 @@
 package server;
 
+import files.Pdf;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -75,19 +78,18 @@ public class Server extends Application {
         initServer();
         initTasker();
 
-        ClientSocket client = new ClientSocket();
+//        ClientSocket client = new ClientSocket();
+//
+//        client.conect();
 
-        client.conect();
-
-        Request request = new Request(ServerRequest.RUN_TASK);
-        request.getParametros().add(ServerTask.FASES);
-        request.getParametros().add(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
-
-        System.out.println("CLIENT--Envia peticion");
-        Response res = client.sendRequest(request);
-        System.out.println("CLIENT--Lee Respuesta");
-        System.out.println(res);
-        client.disconect();
-        
+//        Request request = new Request(ServerRequest.RUN_TASK);
+//        request.getParametros().add(ServerTask.FASES);
+//        request.getParametros().add(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+//
+//        System.out.println("CLIENT--Envia peticion");
+//        Response res = client.sendRequest(request);
+//        System.out.println("CLIENT--Lee Respuesta");
+//        System.out.println(res);
+//        client.disconect();
     }
 }

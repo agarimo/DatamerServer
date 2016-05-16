@@ -14,7 +14,7 @@ public class TaskClasificacion extends Tarea{
 
     @Override
     protected Object call() throws Exception {
-        System.out.println("Me ejecutoooo CLASIFICACION");
+        System.out.println("Ejecutando CLASIFICACION");
         
         return null;
     }

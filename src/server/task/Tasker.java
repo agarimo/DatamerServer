@@ -35,10 +35,10 @@ public class Tasker {
         mt.setId(-1);
         mt.setPropietario("SERVER");
 
-        long ahora = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+//        long ahora = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 //        long futuro = LocalDateTime.now().plusDays(1).withHour(Var.horaExec).withMinute(Var.minExec).toEpochSecond(ZoneOffset.UTC);
-        long futuro = LocalDateTime.now().withHour(20).withMinute(0).toEpochSecond(ZoneOffset.UTC);
-        initDelay = futuro - ahora;
+//        initDelay = futuro - ahora;
+        initDelay = 1;
         delay = Var.delayExec;
 
         mt.setTipoTarea(ServerTask.BOE);
@@ -46,11 +46,11 @@ public class Tasker {
 
         ses.scheduleAtFixedRate(descarga, initDelay, delay, TimeUnit.SECONDS);
 
-        mt.setTipoTarea(ServerTask.BOE_CLASIFICACION);
-        TaskClasificacion clasificacion = new TaskClasificacion(mt);
-        initDelay = initDelay + 900;
-
-        ses.scheduleAtFixedRate(clasificacion, initDelay, delay, TimeUnit.SECONDS);
+//        mt.setTipoTarea(ServerTask.BOE_CLASIFICACION);
+//        TaskClasificacion clasificacion = new TaskClasificacion(mt);
+//        initDelay = initDelay + 900;
+//
+//        ses.scheduleAtFixedRate(clasificacion, initDelay, delay, TimeUnit.SECONDS);
     }
 
     public synchronized boolean runTask(ModeloTarea tarea) {
