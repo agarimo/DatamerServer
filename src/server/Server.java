@@ -1,12 +1,5 @@
 package server;
 
-import files.Pdf;
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -15,13 +8,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import static server.Var.tasker;
-import server.socket.ClientSocket;
 import server.socket.SkServer;
 import server.task.Tasker;
-import socket.enty.Request;
-import socket.enty.Response;
-import socket.enty.ServerRequest;
-import socket.enty.ServerTask;
 
 /**
  *
@@ -35,6 +23,7 @@ public class Server extends Application {
     public void init() {
         Var.initVar();
         initServer();
+        initTasker();
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
@@ -71,6 +60,7 @@ public class Server extends Application {
         System.out.println("Iniciando TASKER");
         tasker = new Tasker();
         tasker.initRutina();
+//        new Thread(tasker).start();
     }
 
     public static void test() {

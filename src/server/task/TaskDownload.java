@@ -31,7 +31,7 @@ import sql.Sql;
  *
  * @author Agárimo
  */
-public class TaskDownload extends Tarea {
+public class TaskDownload extends Tarea implements Runnable {
 
     private final LocalDate fecha;
     private final File pdf;
@@ -40,7 +40,6 @@ public class TaskDownload extends Tarea {
     private String status;
 
     private List<Publicacion> boe;
-    private Sql bd;
 
     public TaskDownload(ModeloTarea modeloTarea) {
         super(modeloTarea);
@@ -59,14 +58,13 @@ public class TaskDownload extends Tarea {
     }
 
     @Override
-    protected Object call() {
+    public void run() {
+        Var.tasker.addTask(this);
         try {
-            System.out.println("Iniciando Download");
+            System.out.println("Iniciando DOWNLOAD");
 
-            Platform.runLater(() -> {
-                this.updateMessage("Cargando BOLETINES");
-                this.tarea.setProgreso(this.getMessage());
-            });
+            setTitulo("DOWNLOAD BOE");
+            setMensaje("Iniciando DOWNLOAD");
 
             val = 1;
             boe = splitUrl(getUrl(generaLink()));
@@ -78,19 +76,10 @@ public class TaskDownload extends Tarea {
                 status = val + " de " + boe.size();
                 status = status.replace(".0", "");
                 System.out.println(status);
-
-                Platform.runLater(() -> {
-                    this.updateProgress(val, boe.size());
-                    this.tarea.setPorcentaje(Double.toString(this.getProgress()) + " %");
-                });
+                setPorcentaje(val, boe.size());
 
                 if (descarga(aux.getLink())) {
-
-                    Platform.runLater(() -> {
-                        this.updateMessage("Updating " + status);
-                        this.tarea.setProgreso(this.getMessage());
-                    });
-
+                    setMensaje("Updating " + status);
                     LoadFile lf = new LoadFile(txt);
                     aux.setCve(getCve(lf.getLineas()));
                     aux.setDatos(lf.getFileData());
@@ -105,19 +94,15 @@ public class TaskDownload extends Tarea {
 
             desconectar();
             clean();
-            System.out.println("Finalizado Descarga");
+            System.out.println("Finalizado DOWNLOAD");
         } catch (Exception ex) {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
+        Var.tasker.removeTask(this);
     }
 
     private void clean() {
-        Platform.runLater(() -> {
-            this.updateMessage("Finalizando proceso");
-            this.tarea.setProgreso(this.getMessage());
-        });
-
+        setMensaje("Finalizando DOWNLOAD");
         pdf.delete();
         txt.delete();
     }
@@ -152,8 +137,10 @@ public class TaskDownload extends Tarea {
                 }
             }
         } catch (MalformedURLException ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("WEB NO DISPONIBLE");
         } catch (IOException ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("WEB NO DISPONIBLE");
         }
 
@@ -214,16 +201,9 @@ public class TaskDownload extends Tarea {
     //<editor-fold defaultstate="collapsed" desc="DESCARGA">
     private boolean descarga(String link) {
         try {
-            Platform.runLater(() -> {
-                this.updateMessage("Downloading " + status);
-            });
-
+            setMensaje("Downloading " + status);
             files.Download.downloadFILE(link, pdf);
-
-            Platform.runLater(() -> {
-                this.updateMessage("Parsing " + status);
-            });
-
+            setMensaje("Parsing " + status);
             convertPDF(pdf, txt);
             return true;
         } catch (Exception ex) {
@@ -254,6 +234,11 @@ public class TaskDownload extends Tarea {
         BufferedWriter bw = new BufferedWriter(fw);
         PdfReader pr = new PdfReader(origen.getAbsolutePath());
         int pNum = pr.getNumberOfPages();
+
+        if (pNum > 2) {
+            pNum = 2;
+        }
+
         for (int page = 1; page <= pNum; page++) {
             String text = PdfTextExtractor.getTextFromPage(pr, page);
             bw.write(text);
@@ -274,27 +259,6 @@ public class TaskDownload extends Tarea {
 //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="INSERCIÓN EN DB">
-    private boolean conectar() {
-        System.out.println("Conectando");
-        try {
-            bd = new Sql(Var.con);
-            return true;
-        } catch (SQLException ex) {
-            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-    }
-
-    private boolean desconectar() {
-        try {
-            bd.close();
-            return true;
-        } catch (SQLException ex) {
-            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-    }
-
     private void duplicados() {
         try {
             Publicacion aux;

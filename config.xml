@@ -8,8 +8,9 @@
 <entry key="con_pass">IkuinenK@@m.s84</entry>
 <entry key="con_host">192.168.1.40</entry>
 <entry key="server_port">10987</entry>
+<!--- HORA y MINUTO de ejecución programada  -->
 <entry key="hora_exec">8</entry>
-<entry key="min_exec">0</entry>
+<entry key="min_exec">30</entry>
 <!--- Parámetro 'delay_exec' está expresado en SEGUNDOS  -->
-<entry key="delay_exec">7200</entry>
+<entry key="delay_exec">86400</entry>
 </properties>

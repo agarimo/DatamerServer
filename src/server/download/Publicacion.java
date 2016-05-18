@@ -11,6 +11,7 @@ import util.Varios;
  * @author Agárimo
  */
 public class Publicacion {
+
     private int id;
     private LocalDate fecha;
     private String codigo;
@@ -62,7 +63,7 @@ public class Publicacion {
     public void setEntidad(String entidad) {
         this.entidad = entidad;
     }
-    
+
     public String getDescripcion() {
         return descripcion;
     }
@@ -111,9 +112,33 @@ public class Publicacion {
         this.status = status;
     }
 
+    public void setStatus(String status) {
+
+        switch (status) {
+            case "APP":
+                this.status = Status.APP;
+                break;
+            case "DELETED":
+                this.status = Status.DELETED;
+                break;
+            case "PENDING":
+                this.status = Status.PENDING;
+                break;
+            case "SOURCE":
+                this.status = Status.SOURCE;
+                break;
+            case "USER":
+                this.status = Status.USER;
+                break;
+            default:
+                this.status = Status.PENDING;
+                break;
+        }
+    }
+
     @Override
-    public String toString(){
-        return this.codigo +" "+this.origen+" "+this.descripcion;
+    public String toString() {
+        return this.codigo + " " + this.origen + " " + this.descripcion;
     }
 
     @Override
@@ -137,7 +162,7 @@ public class Publicacion {
         final Publicacion other = (Publicacion) obj;
         return Objects.equals(this.codigo, other.codigo);
     }
-    
+
     public String SQLCrear() {
         return "INSERT into " + Var.dbName + ".publicacion (fecha,codigo,entidad,origen,descripcion,datos,link,cve,selected,status) values("
                 + Varios.comillas(this.fecha.format(DateTimeFormatter.ISO_LOCAL_DATE)) + ","
@@ -155,5 +180,12 @@ public class Publicacion {
 
     public String SQLBuscar() {
         return "SELECT * FROM " + Var.dbName + ".publicacion WHERE codigo=" + Varios.comillas(this.codigo);
+    }
+
+    public String SQLEditarStatus() {
+        return "UPDATE " + Var.dbName + ".publicacion SET "
+                + "selected=" + this.selected + ","
+                + "status=" + Varios.comillas(this.status.toString()) + " "
+                + "WHERE id=" + this.id;
     }
 }
