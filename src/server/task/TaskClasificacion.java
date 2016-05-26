@@ -22,11 +22,13 @@ public class TaskClasificacion extends Tarea {
     private List<String> entidad;
     private List<String> seleccion;
     private List<String> descarte;
+    private List<String> descarteNeutro;
 
     private String queryPublicacion = "SELECT * FROM " + Var.dbName + ".publicacion WHERE selected IS null";
     private String queryEntidad = "SELECT entidad FROM " + Var.dbName + ".entidad_descarte";
     private String querySeleccion = "SELECT texto FROM " + Var.dbName + ".texto_seleccion";
     private String queryDescarte = "SELECT texto FROM " + Var.dbName + ".texto_descarte";
+    private String queryDescarteNeutro = "SELECT texto FROM " + Var.dbName + ".texto_descarte_neutro";
 
     public TaskClasificacion(ModeloTarea tarea) {
         super(tarea);
@@ -40,6 +42,7 @@ public class TaskClasificacion extends Tarea {
         initData();
 
         runEntidad();
+        runDescarteNeutro();
         runSeleccion();
         runDescarte();
 
@@ -53,17 +56,18 @@ public class TaskClasificacion extends Tarea {
             entidad = bd.getStringList(queryEntidad);
             seleccion = bd.getStringList(querySeleccion);
             descarte = bd.getStringList(queryDescarte);
+            descarteNeutro = bd.getStringList(queryDescarteNeutro);
             publicacion = Query.listaPublicacion(queryPublicacion);
         } catch (SQLException ex) {
             Logger.getLogger(TaskClasificacion.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    private void runEntidad(){
+
+    private void runEntidad() {
         setTitulo("ENTIDAD");
         List<Publicacion> ex = new ArrayList();
         val = 1;
-        
+
         publicacion.stream().forEach((aux) -> {
             status = val + " de " + publicacion.size();
             status = status.replace(".0", "");
@@ -87,8 +91,37 @@ public class TaskClasificacion extends Tarea {
 
         publicacion.clear();
         publicacion.addAll(ex);
-        
-        
+
+    }
+    
+    private void runDescarteNeutro() {
+        setTitulo("DESCARTE-NEUTRO");
+        List<Publicacion> ex = new ArrayList();
+        val = 1;
+
+        publicacion.stream().forEach((aux) -> {
+            status = val + " de " + publicacion.size();
+            status = status.replace(".0", "");
+            setPorcentaje(val, publicacion.size());
+            setMensaje("Comprobando " + status);
+
+            if (buscar(descarteNeutro, aux.getDatos())) {
+                aux.setSelected(false);
+                aux.setStatus(Status.PENDING);
+
+                try {
+                    bd.ejecutar(aux.SQLEditarStatus());
+                } catch (SQLException ex1) {
+                    Logger.getLogger(TaskClasificacion.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+            } else {
+                ex.add(aux);
+            }
+            val++;
+        });
+
+        publicacion.clear();
+        publicacion.addAll(ex);
     }
 
     private void runSeleccion() {

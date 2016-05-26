@@ -58,6 +58,7 @@ public class Tasker implements Runnable {
         long ahora = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
         long futuro = LocalDateTime.now().plusDays(1).withHour(Var.horaExec).withMinute(Var.minExec).toEpochSecond(ZoneOffset.UTC);
         initDelay = futuro - ahora;
+        initDelay = 1;
         delay = Var.delayExec;
 
         ses.scheduleAtFixedRate(() -> {

@@ -1,5 +1,6 @@
 package server;
 
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -10,6 +11,8 @@ import javafx.stage.Stage;
 import static server.Var.tasker;
 import server.socket.SkServer;
 import server.task.Tasker;
+import sql.Sql;
+import util.Varios;
 
 /**
  *
@@ -65,7 +68,7 @@ public class Server extends Application {
 
     public static void test() {
         Var.initVar();
-        initServer();
+//        initServer();
         initTasker();
 
 //        ClientSocket client = new ClientSocket();
