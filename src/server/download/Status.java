@@ -2,7 +2,7 @@ package server.download;
 
 /**
  *
- * @author agari
+ * @author Agárimo
  */
 public enum Status {
 
@@ -17,6 +17,10 @@ public enum Status {
 
     Status(int value) {
         this.value = value;
+    }
+    
+    public int getValue(){
+        return this.value;
     }
 
     @Override

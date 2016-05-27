@@ -7,13 +7,11 @@
 package server;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import server.download.Publicacion;
-import server.download.Status;
 import sql.Sql;
 import util.Dates;
 
