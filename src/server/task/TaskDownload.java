@@ -24,6 +24,7 @@ import server.Var;
 import server.download.Boletin;
 import server.download.Publicacion;
 import socket.enty.ModeloTarea;
+import util.Varios;
 
 /**
  *
@@ -34,9 +35,6 @@ public class TaskDownload extends Tarea implements Runnable {
     private final LocalDate fecha;
     private final File pdf;
     private final File txt;
-    private double val;
-    private String status;
-
     private List<Publicacion> boe;
 
     public TaskDownload(ModeloTarea modeloTarea) {
@@ -68,6 +66,7 @@ public class TaskDownload extends Tarea implements Runnable {
             boe = splitUrl(getUrl(generaLink()));
 
             conectar();
+            creaBoe();
             duplicados();
 
             boe.stream().forEach((aux) -> {
@@ -97,6 +96,15 @@ public class TaskDownload extends Tarea implements Runnable {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
         }
         Var.tasker.removeTask(this);
+    }
+
+    private void creaBoe() {
+        try {
+            String query = "INSERT INTO boes.boe (fecha,link,isClas) VALUES (" + Varios.comillas(fecha.format(DateTimeFormatter.ISO_DATE)) + "," + Varios.comillas(generaLink()) + ",0);";
+            bd.ejecutar(query);
+        } catch (SQLException ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void clean() {
@@ -233,8 +241,8 @@ public class TaskDownload extends Tarea implements Runnable {
         PdfReader pr = new PdfReader(origen.getAbsolutePath());
         int pNum = pr.getNumberOfPages();
 
-        if (pNum > 2) {
-            pNum = 2;
+        if (pNum > 3) {
+            pNum = 3;
         }
 
         for (int page = 1; page <= pNum; page++) {

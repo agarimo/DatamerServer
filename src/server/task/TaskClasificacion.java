@@ -39,8 +39,8 @@ public class TaskClasificacion extends Tarea {
         conectar();
         initData();
 
-        runEntidad();
         runSeleccion();
+        runEntidad();
         runDescarte();
 
         desconectar();
