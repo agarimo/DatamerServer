@@ -6,11 +6,16 @@
 package server.UI;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -18,6 +23,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
+import server.Var;
 import socket.enty.ModeloTarea;
 
 /**
@@ -49,14 +55,38 @@ public class WinC implements Initializable {
 
     @FXML
     private MenuItem miCerrar;
+    
+    @FXML
+    private ComboBox cbRefresh;
 
     private ObservableList<ModeloTarea> tareas;
+    private ObservableList<String> comboBox;
+    private long refreshTime;
+    private boolean keepRefresh;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        initVar();
         initTable();
-        // TODO
+        initRefresh();
     }
+    
+    public void initVar(){
+        keepRefresh=true;
+        refreshTime=5000;
+        
+        comboBox = FXCollections.observableArrayList();
+        cbRefresh.setItems(comboBox);
+        comboBox.add("1 segundo");
+        comboBox.add("5 segundos");
+        comboBox.add("10 segundos");
+        comboBox.add("15 segundos");
+        comboBox.add("30 segundos");
+        
+        cbRefresh.getSelectionModel().select("5 segundos");
+        
+    }
+    
 
     public void initTable() {
         tareaCL.setCellValueFactory(new PropertyValueFactory<>("titulo"));
@@ -84,6 +114,26 @@ public class WinC implements Initializable {
         tareas = FXCollections.observableArrayList();
         tabla.setItems(tareas);
     }
-    
+
+    public void initRefresh() {
+        Thread a = new Thread(() -> {
+
+            while (keepRefresh) {
+                List<ModeloTarea> aux = Var.tasker.getStatus();
+
+                Platform.runLater(() -> {
+                    tareas.clear();
+                    tareas.addAll(aux);
+                });
+
+                try {
+                    Thread.sleep(refreshTime);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(WinC.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        a.start();
+    }
 
 }
