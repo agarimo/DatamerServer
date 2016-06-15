@@ -10,7 +10,6 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -41,37 +40,36 @@
             <TableColumn fx:id="estadoCL" editable="false" minWidth="0.0" prefWidth="204.0" sortable="false" text="Estado" />
         </columns>
       </TableView>
-      <HBox alignment="CENTER_LEFT">
+      <HBox spacing="2.0">
          <VBox.margin>
-            <Insets left="10.0" top="10.0" />
+            <Insets left="5.0" right="5.0" top="10.0" />
          </VBox.margin>
          <children>
-            <Label text="Status : " />
-            <Pane prefHeight="25.0" prefWidth="200.0" />
-            <Label text="Refresco :">
+            <Label prefHeight="25.0" text="Status : " />
+            <VBox prefHeight="50.0" prefWidth="200.0" spacing="10.0">
+               <children>
+                  <TextField fx:id="tfServer" alignment="CENTER" editable="false" style="-fx-background-color: black;" text="SERVER">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </TextField>
+                  <TextField fx:id="tfTasker" alignment="CENTER" style="-fx-background-color: black;" text="TASKER">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </TextField>
+               </children>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </VBox>
+            <Label prefHeight="25.0" prefWidth="52.0" text="Refresco :">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin>
             </Label>
             <ComboBox fx:id="cbRefresh" prefWidth="150.0" />
          </children>
-      </HBox>
-      <HBox alignment="CENTER" prefHeight="40.0" prefWidth="390.0" spacing="20.0">
-         <children>
-            <TextField fx:id="tfServer" alignment="CENTER" editable="false" style="-fx-background-color: black;" text="SERVER">
-               <font>
-                  <Font name="System Bold" size="12.0" />
-               </font>
-            </TextField>
-            <TextField fx:id="tfTasker" alignment="CENTER" style="-fx-background-color: black;" text="TASKER">
-               <font>
-                  <Font name="System Bold" size="12.0" />
-               </font>
-            </TextField>
-         </children>
-         <VBox.margin>
-            <Insets left="10.0" />
-         </VBox.margin>
       </HBox>
    </children>
 </VBox>

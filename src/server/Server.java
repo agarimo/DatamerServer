@@ -1,6 +1,5 @@
 package server;
 
-import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -8,11 +7,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import static server.Var.tasker;
 import server.socket.SkServer;
 import server.task.Tasker;
-import sql.Sql;
-import util.Varios;
 
 /**
  *
@@ -20,13 +16,12 @@ import util.Varios;
  */
 public class Server extends Application {
     
-    private static SkServer server;
-
     @Override
     public void init() {
         Var.initVar();
         initServer();
         initTasker();
+        
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
@@ -54,15 +49,13 @@ public class Server extends Application {
     }
     
     private static void initServer(){
-        System.out.println("Iniciando SERVER");
-        server = new SkServer(Var.serverPort);
-        new Thread(server).start();
+        Var.server = new SkServer(Var.serverPort);
+        new Thread(Var.server).start();
     }
     
     private static void initTasker(){
-        System.out.println("Iniciando TASKER");
-        tasker = new Tasker();
-        tasker.initRutina();
+        Var.tasker = new Tasker();
+        Var.tasker.initRutina();
 //        new Thread(tasker).start();
     }
 

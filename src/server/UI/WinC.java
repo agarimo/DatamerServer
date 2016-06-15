@@ -67,6 +67,7 @@ public class WinC implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initVar();
+        initStatus();
         initTable();
         initRefresh();
     }
@@ -124,6 +125,7 @@ public class WinC implements Initializable {
                 Platform.runLater(() -> {
                     tareas.clear();
                     tareas.addAll(aux);
+                    initStatus();
                 });
 
                 try {
@@ -134,6 +136,26 @@ public class WinC implements Initializable {
             }
         });
         a.start();
+    }
+    
+    public void initStatus(){
+        
+        
+        if(Var.server.isRunning()){
+            tfServer.setStyle("-fx-text-fill: green;"
+                    + "-fx-background-color: black");
+        }else{
+            tfServer.setStyle("-fx-text-fill: red;"
+                    + "-fx-background-color: black");
+        }
+        
+        if(Var.tasker.isRunning()){
+            tfTasker.setStyle("-fx-text-fill: green;"
+                    + "-fx-background-color: black");
+        }else{
+            tfTasker.setStyle("-fx-text-fill: red;"
+                    + "-fx-background-color: black");
+        }
     }
 
 }

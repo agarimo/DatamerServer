@@ -19,16 +19,21 @@ import socket.enty.ServerTask;
 public class Tasker implements Runnable {
 
     private static int idCount;
-    
+    private boolean run;
+
     private long initDelay;
     private long delay;
     private ScheduledExecutorService ses;
     private List<Tarea> running_task;
 
     public Tasker() {
-        idCount=1;
+        idCount = 1;
         ses = Executors.newSingleThreadScheduledExecutor();
         running_task = new ArrayList();
+    }
+
+    public boolean isRunning() {
+        return this.run;
     }
 
     @Override
@@ -67,15 +72,17 @@ public class Tasker implements Runnable {
             mt1.setTipoTarea(ServerTask.BOE);
             runTask(mt1);
         }, initDelay, delay, TimeUnit.SECONDS);
-        
+
         initDelay = initDelay + 1;
-        
+
         ses.scheduleAtFixedRate(() -> {
             ModeloTarea mt1 = new ModeloTarea();
             mt1.setPropietario("SERVER");
             mt1.setTipoTarea(ServerTask.BOE_CLASIFICACION);
             runTask(mt1);
         }, initDelay, delay, TimeUnit.SECONDS);
+        
+        this.run = true;
     }
 
     public synchronized boolean runTask(ModeloTarea tarea) {
@@ -142,7 +149,7 @@ public class Tasker implements Runnable {
         idCount++;
         TaskDownload task = new TaskDownload(tarea);
         task.run();
-        
+
     }
 
     private void runBoeClasificacion(ModeloTarea tarea) {
