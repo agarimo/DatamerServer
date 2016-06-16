@@ -22,7 +22,7 @@ public class SkServer implements Runnable {
         this.run=true;
     }
     
-    public void desconectar(){
+    public void shutdown(){
         this.run=false;
     }
     

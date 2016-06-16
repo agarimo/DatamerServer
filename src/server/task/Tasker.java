@@ -16,7 +16,7 @@ import socket.enty.ServerTask;
  *
  * @author Agárimo
  */
-public class Tasker implements Runnable {
+public class Tasker {
 
     private static int idCount;
     private boolean run;
@@ -34,29 +34,6 @@ public class Tasker implements Runnable {
 
     public boolean isRunning() {
         return this.run;
-    }
-
-    @Override
-    public void run() {
-//        ModeloTarea mt;
-//        List<ModeloTarea> list;
-//        Iterator<ModeloTarea> it;
-//
-//        while (true) {
-//            list = this.getStatus();
-//            it = list.iterator();
-//
-//            while (it.hasNext()) {
-//                mt = it.next();
-//                System.out.println(mt);
-//            }
-//
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException ex) {
-//                Logger.getLogger(Tasker.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
     }
 
     public void initRutina() {
@@ -81,8 +58,13 @@ public class Tasker implements Runnable {
             mt1.setTipoTarea(ServerTask.BOE_CLASIFICACION);
             runTask(mt1);
         }, initDelay, delay, TimeUnit.SECONDS);
-        
+
         this.run = true;
+    }
+    
+    public void shutdown(){
+        ses.shutdown();
+        run=false;
     }
 
     public synchronized boolean runTask(ModeloTarea tarea) {

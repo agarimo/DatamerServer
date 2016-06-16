@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import server.Var;
-import util.Varios;
+import tools.Util;
 
 /**
  *
@@ -165,27 +165,27 @@ public class Publicacion {
 
     public String SQLCrear() {
         return "INSERT into " + Var.dbName + ".publicacion (fecha,codigo,entidad,origen,descripcion,datos,link,cve,selected,status) values("
-                + Varios.comillas(this.fecha.format(DateTimeFormatter.ISO_LOCAL_DATE)) + ","
-                + Varios.comillas(this.codigo) + ","
-                + Varios.comillas(this.entidad) + ","
-                + Varios.comillas(this.origen) + ","
-                + Varios.comillas(this.descripcion) + ","
-                + Varios.comillas(this.datos) + ","
-                + Varios.comillas(this.link) + ","
-                + Varios.comillas(this.cve) + ","
+                + Util.comillas(this.fecha.format(DateTimeFormatter.ISO_LOCAL_DATE)) + ","
+                + Util.comillas(this.codigo) + ","
+                + Util.comillas(this.entidad) + ","
+                + Util.comillas(this.origen) + ","
+                + Util.comillas(this.descripcion) + ","
+                + Util.comillas(this.datos) + ","
+                + Util.comillas(this.link) + ","
+                + Util.comillas(this.cve) + ","
                 + this.selected + ","
-                + Varios.comillas(this.status.toString())
+                + Util.comillas(this.status.toString())
                 + ");";
     }
 
     public String SQLBuscar() {
-        return "SELECT * FROM " + Var.dbName + ".publicacion WHERE codigo=" + Varios.comillas(this.codigo);
+        return "SELECT * FROM " + Var.dbName + ".publicacion WHERE codigo=" + Util.comillas(this.codigo);
     }
 
     public String SQLEditarStatus() {
         return "UPDATE " + Var.dbName + ".publicacion SET "
                 + "selected=" + this.selected + ","
-                + "status=" + Varios.comillas(this.status.toString()) + " "
+                + "status=" + Util.comillas(this.status.toString()) + " "
                 + "WHERE id=" + this.id;
     }
 }

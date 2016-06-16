@@ -2,8 +2,7 @@ package server.task;
 
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.PdfTextExtractor;
-import files.LoadFile;
-import files.Util;
+import tools.LoadFile;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -24,7 +23,7 @@ import server.Var;
 import server.download.Boletin;
 import server.download.Publicacion;
 import socket.enty.ModeloTarea;
-import util.Varios;
+import tools.Util;
 
 /**
  *
@@ -66,6 +65,7 @@ public class TaskDownload extends Tarea implements Runnable {
             boe = splitUrl(getUrl(generaLink()));
 
             conectar();
+            cleanDB();
             creaBoe();
             duplicados();
 
@@ -98,9 +98,18 @@ public class TaskDownload extends Tarea implements Runnable {
         Var.tasker.removeTask(this);
     }
 
+    private void cleanDB() {
+        try {
+            String query = "DELETE from boes.boe where DATEDIFF(curdate(),fecha)> 10";
+            bd.ejecutar(query);
+        } catch (SQLException ex) {
+            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     private void creaBoe() {
         try {
-            String query = "INSERT INTO boes.boe (fecha,link,isClas) VALUES (" + Varios.comillas(fecha.format(DateTimeFormatter.ISO_DATE)) + "," + Varios.comillas(generaLink()) + ",0);";
+            String query = "INSERT INTO boes.boe (fecha,link,isClas) VALUES (" + Util.comillas(fecha.format(DateTimeFormatter.ISO_DATE)) + "," + Util.comillas(generaLink()) + ",0);";
             bd.ejecutar(query);
         } catch (SQLException ex) {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
@@ -208,7 +217,7 @@ public class TaskDownload extends Tarea implements Runnable {
     private boolean descarga(String link) {
         try {
             setMensaje("Downloading " + status);
-            files.Download.downloadFILE(link, pdf);
+            tools.Download.downloadFILE(link, pdf);
             setMensaje("Parsing " + status);
             convertPDF(pdf, txt);
             return true;
@@ -259,8 +268,7 @@ public class TaskDownload extends Tarea implements Runnable {
     }
 
     private void convertPDFFixFile(File txt) {
-        String datos = Util.leeArchivo(txt);
-        Util.escribeArchivo(txt, datos);
+        LoadFile.writeFile(txt, LoadFile.readFile(txt));
     }
 //</editor-fold>
 

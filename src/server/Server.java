@@ -3,10 +3,12 @@ package server;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import server.socket.SkServer;
 import server.task.Tasker;
 
@@ -15,13 +17,15 @@ import server.task.Tasker;
  * @author agari
  */
 public class Server extends Application {
-    
+
+    private static Stage stage;
+
     @Override
     public void init() {
         Var.initVar();
         initServer();
         initTasker();
-        
+
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
@@ -30,13 +34,22 @@ public class Server extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage st) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/server/UI/Win.fxml"));
 
         Scene scene = new Scene(root);
 
+        stage = st;
         stage.setScene(scene);
+        stage.setResizable(false);
+        stage.setMaximized(false);
         stage.show();
+
+        stage.setOnCloseRequest((WindowEvent event) -> {
+            event.consume();
+            System.out.println("Se quiere cerrar el jodío!");
+            shutdown();
+        });
     }
 
     /**
@@ -44,38 +57,23 @@ public class Server extends Application {
      */
     public static void main(String[] args) {
         launch(args);
-//        test();
-        
     }
-    
-    private static void initServer(){
+
+    private static void initServer() {
         Var.server = new SkServer(Var.serverPort);
         new Thread(Var.server).start();
     }
-    
-    private static void initTasker(){
+
+    private static void initTasker() {
         Var.tasker = new Tasker();
         Var.tasker.initRutina();
-//        new Thread(tasker).start();
     }
 
-    public static void test() {
-        Var.initVar();
-//        initServer();
-        initTasker();
+    private static void shutdown() {
+        stage.hide();
+        Var.tasker.shutdown();
+        Var.server.shutdown();
+        System.exit(0);
 
-//        ClientSocket client = new ClientSocket();
-//
-//        client.conect();
-
-//        Request request = new Request(ServerRequest.RUN_TASK);
-//        request.getParametros().add(ServerTask.FASES);
-//        request.getParametros().add(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
-//
-//        System.out.println("CLIENT--Envia peticion");
-//        Response res = client.sendRequest(request);
-//        System.out.println("CLIENT--Lee Respuesta");
-//        System.out.println(res);
-//        client.disconect();
     }
 }

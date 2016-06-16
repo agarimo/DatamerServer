@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package server;
 
 import java.sql.SQLException;
@@ -13,15 +12,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import server.download.Publicacion;
 import sql.Sql;
-import util.Dates;
+import tools.Dates;
 
 /**
  *
  * @author Agárimo
  */
 public class Query extends sql.Query {
-    
-    
+
+    public static void limpiezaBBDD() {
+        try {
+            bd = new Sql(Var.con);
+            bd.ejecutar("DELETE from boes.boe where DATEDIFF(curdate(),fecha)> 10");
+            bd.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(Query.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public static List<Publicacion> listaPublicacion(String query) {
 
         List<Publicacion> list = new ArrayList();
