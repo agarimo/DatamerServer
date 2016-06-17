@@ -1,5 +1,6 @@
 package server;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -9,8 +10,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import server.socket.SkServer;
-import server.task.Tasker;
 
 /**
  *
@@ -19,12 +18,12 @@ import server.task.Tasker;
 public class Server extends Application {
 
     private static Stage stage;
+    private Parent root;
 
     @Override
-    public void init() {
+    public void init() throws IOException {
         Var.initVar();
-        initServer();
-        initTasker();
+        root = FXMLLoader.load(getClass().getResource("/server/UI/Win.fxml"));
 
         try {
             Thread.sleep(1000);
@@ -35,11 +34,10 @@ public class Server extends Application {
 
     @Override
     public void start(Stage st) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/server/UI/Win.fxml"));
 
         Scene scene = new Scene(root);
-
         stage = st;
+
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setMaximized(false);
@@ -47,8 +45,7 @@ public class Server extends Application {
 
         stage.setOnCloseRequest((WindowEvent event) -> {
             event.consume();
-            System.out.println("Se quiere cerrar el jodío!");
-            shutdown();
+            minimize();
         });
     }
 
@@ -59,21 +56,13 @@ public class Server extends Application {
         launch(args);
     }
 
-    private static void initServer() {
-        Var.server = new SkServer(Var.serverPort);
-        new Thread(Var.server).start();
-    }
-
-    private static void initTasker() {
-        Var.tasker = new Tasker();
-        Var.tasker.initRutina();
-    }
-
-    private static void shutdown() {
+    public static void shutdown() {
         stage.hide();
-        Var.tasker.shutdown();
-        Var.server.shutdown();
-        System.exit(0);
-
+        Var.shutdown();
+        Platform.exit();
+    }
+    
+    private static void minimize(){
+        stage.setIconified(true);
     }
 }

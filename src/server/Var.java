@@ -20,7 +20,7 @@ import sql.Conexion;
 public class Var {
 
     private static Properties config;
-    
+
     public static File fileSystem;
 
     public static Conexion con;
@@ -28,29 +28,37 @@ public class Var {
 
     public static SkServer server;
     public static int serverPort;
-    
+
     public static Tasker tasker;
     public static int horaExec;
     public static int minExec;
     public static int delayExec;
 
+    public static boolean keepRefresh;
+    public static long refreshTime;
+
     public static void initVar() {
         loadConfig();
         initVarDriver();
         initConnection();
-        
+
         fileSystem = new File("data");
         fileSystem.mkdirs();
-        
 
         dbName = config.getProperty("dbName");
         serverPort = Integer.parseInt(config.getProperty("server_port"));
         horaExec = Integer.parseInt(config.getProperty("hora_exec"));
         minExec = Integer.parseInt(config.getProperty("min_exec"));
         delayExec = Integer.parseInt(config.getProperty("delay_exec"));
-        
-        
-        
+
+        keepRefresh = true;
+        refreshTime = 1;
+
+        tasker = new Tasker();
+        tasker.sheduledTask();
+
+        server = new SkServer(serverPort);
+        tasker.getScheduledExecutor().execute(server);
     }
 
     private static void initVarDriver() {
@@ -71,37 +79,27 @@ public class Var {
         con.setPass(config.getProperty("con_pass"));
     }
 
-    private static void loadConfig() {
-        try {
-            config = new Properties();
-            InputStream in = new FileInputStream("config.xml");
-            config.loadFromXML(in);
-            in.close();
+    public static void shutdown() {
+        keepRefresh = false;
+        server.shutdown();
+        tasker.shutdown();
+    }
 
+    private static void loadConfig() {
+        config = new Properties();
+        try (InputStream in = new FileInputStream("config.xml")) {
+            config.loadFromXML(in);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(Var.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
 
     public static void saveConfig() {
-        OutputStream salida = null;
-
-        try {
-            salida = new FileOutputStream("config.xml");
-
-            config.storeToXML(salida, "Archivo de propiedades XML de Datamer_server");
-
-        } catch (IOException io) {
-            io.printStackTrace();
-        } finally {
-            if (salida != null) {
-                try {
-                    salida.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
+        try (OutputStream out = new FileOutputStream("config.xml")) {
+            config.storeToXML(out, "Archivo de propiedades XML de Datamer_server");
+        } catch (IOException ex) {
+            Logger.getLogger(Var.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

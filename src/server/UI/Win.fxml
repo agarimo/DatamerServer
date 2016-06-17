@@ -19,13 +19,13 @@
         <menus>
           <Menu mnemonicParsing="false" text="Server">
             <items>
-              <MenuItem fx:id="miCerrar" mnemonicParsing="false" text="Cerrar" />
+              <MenuItem fx:id="miCerrar" mnemonicParsing="false" onAction="#close" text="Cerrar" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Lanzar">
             <items>
-                  <MenuItem mnemonicParsing="false" text="Descarga" />
-                  <MenuItem mnemonicParsing="false" text="Clasificacion" />
+                  <MenuItem mnemonicParsing="false" onAction="#runDownload" text="Descarga" />
+                  <MenuItem mnemonicParsing="false" onAction="#runClasificacion" text="Clasificacion" />
               <MenuItem mnemonicParsing="false" text="Fases" />
                   <MenuItem mnemonicParsing="false" text="Estructuras" />
             </items>
@@ -36,8 +36,8 @@
         <columns>
           <TableColumn fx:id="tareaCL" editable="false" prefWidth="109.0" sortable="false" text="Tarea" />
           <TableColumn fx:id="propietarioCL" editable="false" prefWidth="116.0" sortable="false" text="Propietario" />
-            <TableColumn fx:id="porcentajeCL" editable="false" prefWidth="45.0" sortable="false" text="\%" />
-            <TableColumn fx:id="estadoCL" editable="false" minWidth="0.0" prefWidth="204.0" sortable="false" text="Estado" />
+            <TableColumn fx:id="porcentajeCL" editable="false" prefWidth="35.0" sortable="false" text="\%" />
+            <TableColumn fx:id="estadoCL" editable="false" minWidth="220.0" prefWidth="-1.0" sortable="false" text="Estado" />
         </columns>
       </TableView>
       <HBox spacing="2.0">

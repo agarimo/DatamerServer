@@ -16,7 +16,7 @@ import socket.enty.ServerTask;
  * @author Agárimo
  */
 public class SocketCon implements Runnable {
-    
+
     private final Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
@@ -84,7 +84,7 @@ public class SocketCon implements Runnable {
                 break;
 
             case RUN_TASK:
-                ServerTask st=  (ServerTask) request.getParametros().get(0);
+                ServerTask st = (ServerTask) request.getParametros().get(0);
                 String param = (String) request.getParametros().get(1);
                 response = new Response(ServerResponse.OK);
                 response.getParametros().add(st);

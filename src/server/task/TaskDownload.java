@@ -23,6 +23,7 @@ import server.Var;
 import server.download.Boletin;
 import server.download.Publicacion;
 import socket.enty.ModeloTarea;
+import socket.enty.ServerTask;
 import tools.Util;
 
 /**
@@ -41,7 +42,6 @@ public class TaskDownload extends Tarea implements Runnable {
         this.fecha = LocalDate.now();
         pdf = new File(Var.fileSystem, "dwl.pdf");
         txt = new File(Var.fileSystem, "dwl.txt");
-
     }
 
     public TaskDownload(LocalDate fecha, ModeloTarea modeloTarea) {
@@ -54,25 +54,29 @@ public class TaskDownload extends Tarea implements Runnable {
 
     @Override
     public void run() {
+        val = 1;
+        Thread.currentThread().setName("TaskDownload Thread");
         Var.tasker.addTask(this);
+
         try {
-            System.out.println("Iniciando DOWNLOAD");
-
-            setTitulo("DOWNLOAD BOE");
-            setMensaje("Iniciando DOWNLOAD");
-
-            val = 1;
-            boe = splitUrl(getUrl(generaLink()));
-
+            setTitulo("DOWNLOAD");
+            setMensaje("Iniciando");
+            setPorcentaje(0, 0);
             conectar();
+
+            setMensaje("Preparando DB");
             cleanDB();
+            setMensaje("Init BOE");
             creaBoe();
+            setMensaje("Cargando BOE");
+            boe = splitUrl(getUrl(generaLink()));
+            setMensaje("Comprobando duplicados");
             duplicados();
+            setMensaje("Descargando");
 
             boe.stream().forEach((aux) -> {
                 status = val + " de " + boe.size();
                 status = status.replace(".0", "");
-                System.out.println(status);
                 setPorcentaje(val, boe.size());
 
                 if (descarga(aux.getLink())) {
@@ -91,11 +95,18 @@ public class TaskDownload extends Tarea implements Runnable {
 
             desconectar();
             clean();
-            System.out.println("Finalizado DOWNLOAD");
         } catch (Exception ex) {
-            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+            setMensaje("Excepción");
         }
         Var.tasker.removeTask(this);
+        clasificacion();
+    }
+
+    private void clasificacion() {
+        ModeloTarea mt = this.getModeloTarea();
+        mt.setTipoTarea(ServerTask.BOE_CLASIFICACION);
+        TaskClasificacion task = new TaskClasificacion(mt);
+        task.run();
     }
 
     private void cleanDB() {
@@ -109,7 +120,7 @@ public class TaskDownload extends Tarea implements Runnable {
 
     private void creaBoe() {
         try {
-            String query = "INSERT INTO boes.boe (fecha,link,isClas) VALUES (" + Util.comillas(fecha.format(DateTimeFormatter.ISO_DATE)) + "," + Util.comillas(generaLink()) + ",0);";
+            String query = "INSERT IGNORE INTO boes.boe (fecha,link,isClas) VALUES (" + Util.comillas(fecha.format(DateTimeFormatter.ISO_DATE)) + "," + Util.comillas(generaLink()) + ",0);";
             bd.ejecutar(query);
         } catch (SQLException ex) {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
@@ -117,7 +128,7 @@ public class TaskDownload extends Tarea implements Runnable {
     }
 
     private void clean() {
-        setMensaje("Finalizando DOWNLOAD");
+        setMensaje("Finalizando");
         pdf.delete();
         txt.delete();
     }
@@ -153,10 +164,8 @@ public class TaskDownload extends Tarea implements Runnable {
             }
         } catch (MalformedURLException ex) {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("WEB NO DISPONIBLE");
         } catch (IOException ex) {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("WEB NO DISPONIBLE");
         }
 
         return buffer.toString();

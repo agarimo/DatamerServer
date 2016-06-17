@@ -34,9 +34,13 @@ public class TaskClasificacion extends Tarea {
 
     @Override
     public void run() {
+        Thread.currentThread().setName("TaskClasificacion Thread");
         Var.tasker.addTask(this);
-        System.out.println("Ejecutando CLASIFICACION");
+        setTitulo("CLASS");
+        setPorcentaje(0, 0);
+        setMensaje("Iniciando");
         conectar();
+        setMensaje("Cargando Datos");
         initData();
 
         runSeleccion();
@@ -44,7 +48,7 @@ public class TaskClasificacion extends Tarea {
         runDescarte();
 
         desconectar();
-        System.out.println("Finalizando CLASIFICACION");
+        setMensaje("Finalizando");
         Var.tasker.removeTask(this);
     }
 
@@ -60,7 +64,8 @@ public class TaskClasificacion extends Tarea {
     }
 
     private void runEntidad() {
-        setTitulo("ENTIDAD");
+        setTitulo("CLASS Entidad");
+        setMensaje("Iniciando");
         List<Publicacion> ex = new ArrayList();
         val = 1;
 
@@ -91,7 +96,8 @@ public class TaskClasificacion extends Tarea {
     }
 
     private void runSeleccion() {
-        setTitulo("SELECCIÓN");
+        setTitulo("CLASS Selección");
+        setMensaje("Iniciando");
         List<Publicacion> ex = new ArrayList();
         val = 1;
 
@@ -121,7 +127,8 @@ public class TaskClasificacion extends Tarea {
     }
 
     private void runDescarte() {
-        setTitulo("DESCARTE");
+        setTitulo("CLASS Descarte");
+        setMensaje("Iniciando");
         List<Publicacion> ex = new ArrayList();
         val = 1;
 

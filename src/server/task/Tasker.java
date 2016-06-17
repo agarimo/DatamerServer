@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,51 +21,52 @@ public class Tasker {
 
     private static int idCount;
     private boolean run;
-
     private long initDelay;
     private long delay;
-    private ScheduledExecutorService ses;
+    private ExecutorService clientExecutor;
+    private ScheduledExecutorService scheduledExecutor;
     private List<Tarea> running_task;
 
     public Tasker() {
         idCount = 1;
-        ses = Executors.newSingleThreadScheduledExecutor();
+        run = false;
+        clientExecutor = Executors.newFixedThreadPool(8);
+        scheduledExecutor = Executors.newScheduledThreadPool(6);
         running_task = new ArrayList();
+        run = true;
     }
 
     public boolean isRunning() {
         return this.run;
+
     }
 
-    public void initRutina() {
+    public ScheduledExecutorService getScheduledExecutor() {
+        return scheduledExecutor;
+    }
+
+    public ExecutorService getClientExecutor() {
+        return clientExecutor;
+    }
+
+    public void sheduledTask() {
         long ahora = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
         long futuro = LocalDateTime.now().plusDays(1).withHour(Var.horaExec).withMinute(Var.minExec).toEpochSecond(ZoneOffset.UTC);
         initDelay = futuro - ahora;
 //        initDelay = 1;
         delay = Var.delayExec;
 
-        ses.scheduleAtFixedRate(() -> {
-            ModeloTarea mt1 = new ModeloTarea();
-            mt1.setPropietario("SERVER");
-            mt1.setTipoTarea(ServerTask.BOE);
-            runTask(mt1);
-        }, initDelay, delay, TimeUnit.SECONDS);
-
-        initDelay = initDelay + 1;
-
-        ses.scheduleAtFixedRate(() -> {
-            ModeloTarea mt1 = new ModeloTarea();
-            mt1.setPropietario("SERVER");
-            mt1.setTipoTarea(ServerTask.BOE_CLASIFICACION);
-            runTask(mt1);
-        }, initDelay, delay, TimeUnit.SECONDS);
-
-        this.run = true;
+        ModeloTarea mt = new ModeloTarea();
+        mt.setPropietario("SERVER");
+        mt.setTipoTarea(ServerTask.BOE);
+        TaskDownload task = new TaskDownload(mt);
+        scheduledExecutor.scheduleAtFixedRate(task, initDelay, delay, TimeUnit.SECONDS);
     }
-    
-    public void shutdown(){
-        ses.shutdown();
-        run=false;
+
+    public void shutdown() {
+        scheduledExecutor.shutdownNow();
+        clientExecutor.shutdownNow();
+        run = false;
     }
 
     public synchronized boolean runTask(ModeloTarea tarea) {
@@ -130,15 +132,14 @@ public class Tasker {
         tarea.setId(idCount);
         idCount++;
         TaskDownload task = new TaskDownload(tarea);
-        task.run();
-
+        scheduledExecutor.execute(task);
     }
 
     private void runBoeClasificacion(ModeloTarea tarea) {
         tarea.setId(idCount);
         idCount++;
         TaskClasificacion task = new TaskClasificacion(tarea);
-        task.run();
+        scheduledExecutor.execute(task);
     }
 
     private void runEstructuras(ModeloTarea tarea) {

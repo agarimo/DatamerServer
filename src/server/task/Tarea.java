@@ -18,7 +18,7 @@ public class Tarea implements Runnable {
     protected String titulo;
     protected String mensaje;
     protected double porcentaje;
-    
+
     protected double val;
     protected String status;
 
@@ -48,9 +48,14 @@ public class Tarea implements Runnable {
     }
 
     public void setPorcentaje(double pos, double total) {
-        double res = (pos*100) / total;
+        double res = (pos * 100) / total;
         int por = (int) res;
-        tarea.setPorcentaje(por + " %");
+
+        if (por == 0) {
+            tarea.setPorcentaje("-");
+        } else {
+            tarea.setPorcentaje(por + " %");
+        }
     }
 
     protected boolean conectar() {
