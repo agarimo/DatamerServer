@@ -44,7 +44,7 @@ public class TaskDownload extends Tarea implements Runnable {
         txt = new File(Var.fileSystem, "dwl.txt");
     }
 
-    public TaskDownload(LocalDate fecha, ModeloTarea modeloTarea) {
+    public TaskDownload(ModeloTarea modeloTarea, LocalDate fecha) {
         super(modeloTarea);
         this.fecha = fecha;
         pdf = new File(Var.fileSystem, "dwl.pdf");

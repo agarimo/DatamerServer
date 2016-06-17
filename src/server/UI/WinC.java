@@ -5,6 +5,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -197,6 +198,12 @@ public class WinC implements Initializable {
             tfTasker.setStyle("-fx-text-fill: red;"
                     + "-fx-background-color: black");
         }
+    }
+
+    @FXML
+    void runClasificacionDate(ActionEvent event) {
+     
+
     }
 
     @FXML

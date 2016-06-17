@@ -41,6 +41,7 @@ public class Server extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setMaximized(false);
+        stage.setTitle("DatamerServer 0.1");
         stage.show();
 
         stage.setOnCloseRequest((WindowEvent event) -> {

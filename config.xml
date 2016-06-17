@@ -11,6 +11,6 @@
 <!--- HORA y MINUTO de ejecución programada  -->
 <entry key="hora_exec">8</entry>
 <entry key="min_exec">30</entry>
-<!--- Parámetro 'delay_exec' está expresado en SEGUNDOS  -->
+<!--- Parámetro 'delay_exec' está expresado en SEGUNDOS (86400s = 24h)  -->
 <entry key="delay_exec">86400</entry>
 </properties>

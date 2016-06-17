@@ -21,8 +21,6 @@ public class Tasker {
 
     private static int idCount;
     private boolean run;
-    private long initDelay;
-    private long delay;
     private ExecutorService clientExecutor;
     private ScheduledExecutorService scheduledExecutor;
     private List<Tarea> running_task;
@@ -38,7 +36,6 @@ public class Tasker {
 
     public boolean isRunning() {
         return this.run;
-
     }
 
     public ScheduledExecutorService getScheduledExecutor() {
@@ -50,17 +47,17 @@ public class Tasker {
     }
 
     public void sheduledTask() {
-        long ahora = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-        long futuro = LocalDateTime.now().plusDays(1).withHour(Var.horaExec).withMinute(Var.minExec).toEpochSecond(ZoneOffset.UTC);
-        initDelay = futuro - ahora;
-//        initDelay = 1;
-        delay = Var.delayExec;
-
         ModeloTarea mt = new ModeloTarea();
         mt.setPropietario("SERVER");
         mt.setTipoTarea(ServerTask.BOE);
         TaskDownload task = new TaskDownload(mt);
-        scheduledExecutor.scheduleAtFixedRate(task, initDelay, delay, TimeUnit.SECONDS);
+        scheduledExecutor.scheduleAtFixedRate(task, computeDelay(), Var.delayExec, TimeUnit.SECONDS);
+    }
+    
+    private long computeDelay(){
+        long ahora = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+        long futuro = LocalDateTime.now().plusDays(1).withHour(Var.horaExec).withMinute(Var.minExec).toEpochSecond(ZoneOffset.UTC);
+        return futuro - ahora;
     }
 
     public void shutdown() {
