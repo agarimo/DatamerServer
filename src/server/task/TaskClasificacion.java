@@ -1,6 +1,8 @@
 package server.task;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +36,10 @@ public class TaskClasificacion extends Tarea {
 
     @Override
     public void run() {
+        if(super.tarea.getPropietario().equals("SCHEDULER")){
+            System.out.println("EJECUTANDO CLASIFICACION - "+LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        }
+        
         Thread.currentThread().setName("TaskClasificacion Thread");
         Var.tasker.addTask(this);
         setTitulo("CLASS");
@@ -50,6 +56,10 @@ public class TaskClasificacion extends Tarea {
         desconectar();
         setMensaje("Finalizando");
         Var.tasker.removeTask(this);
+        
+        if(super.tarea.getPropietario().equals("SCHEDULER")){
+            System.out.println("FINALIZADO CLASIFICACION - "+LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        }
     }
 
     private void initData() {

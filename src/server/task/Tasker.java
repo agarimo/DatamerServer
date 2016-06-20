@@ -1,7 +1,12 @@
 package server.task;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -12,6 +17,7 @@ import java.util.stream.Collectors;
 import server.Var;
 import socket.enty.ModeloTarea;
 import socket.enty.ServerTask;
+import tools.Util;
 
 /**
  *
@@ -48,10 +54,12 @@ public class Tasker {
 
     public void sheduledTask() {
         ModeloTarea mt = new ModeloTarea();
-        mt.setPropietario("SERVER");
+        mt.setPropietario("SCHEDULER");
         mt.setTipoTarea(ServerTask.BOE);
         TaskDownload task = new TaskDownload(mt);
-        scheduledExecutor.scheduleAtFixedRate(task, computeDelay(), Var.delayExec, TimeUnit.SECONDS);
+        
+        long initDelay = computeDelay();
+        scheduledExecutor.scheduleAtFixedRate(task, initDelay, Var.delayExec, TimeUnit.SECONDS);
     }
     
     private long computeDelay(){

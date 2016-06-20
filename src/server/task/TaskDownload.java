@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -54,6 +55,11 @@ public class TaskDownload extends Tarea implements Runnable {
 
     @Override
     public void run() {
+        
+        if(super.tarea.getPropietario().equals("SCHEDULER")){
+            System.out.println("EJECUTANDO DOWNLOAD - "+LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        }
+        
         val = 1;
         Thread.currentThread().setName("TaskDownload Thread");
         Var.tasker.addTask(this);
@@ -99,12 +105,19 @@ public class TaskDownload extends Tarea implements Runnable {
             setMensaje("Excepción");
         }
         Var.tasker.removeTask(this);
+        
+        if(super.tarea.getPropietario().equals("SCHEDULER")){
+            System.out.println("FINALIZADO DOWNLOAD - "+LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        }
+        
         clasificacion();
     }
 
     private void clasificacion() {
         ModeloTarea mt = this.getModeloTarea();
         mt.setTipoTarea(ServerTask.BOE_CLASIFICACION);
+        mt.setPropietario("SCHEDULER");
+        mt.setFechaInicio(LocalDateTime.now());
         TaskClasificacion task = new TaskClasificacion(mt);
         task.run();
     }
