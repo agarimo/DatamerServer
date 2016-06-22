@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import server.Var;
 import socket.enty.ModeloTarea;
+import socket.enty.Stats;
 import sql.Sql;
 
 /**
@@ -25,9 +26,11 @@ public class Tarea implements Runnable {
     protected Sql bd;
     protected ModeloTarea tarea;
 
+    protected Stats stats;
+
     public Tarea(ModeloTarea tarea) {
         this.tarea = tarea;
-        this.tarea.setFechaInicio(LocalDateTime.now());
+        this.stats = new Stats(tarea.getTipo(), tarea.getPropietario());
     }
 
     public ModeloTarea getModeloTarea() {
@@ -37,6 +40,23 @@ public class Tarea implements Runnable {
     @Override
     public void run() {
 
+    }
+
+    public void initTarea() {
+        Var.tasker.addTask(this);
+        conectar();
+        val = 1;
+        tarea.setFechaInicio(LocalDateTime.now());
+        stats.setParametros(tarea.getParametros());
+        stats.init(this.bd);
+
+    }
+
+    public void endTarea() {
+        setMensaje("Finalizando");
+        stats.end(this.bd);
+        desconectar();
+        Var.tasker.removeTask(this);
     }
 
     public void setTitulo(String titulo) {
@@ -99,5 +119,4 @@ public class Tarea implements Runnable {
         final Tarea other = (Tarea) obj;
         return Objects.equals(this.tarea.getTipo(), other.tarea.getTipo());
     }
-
 }

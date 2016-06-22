@@ -36,33 +36,26 @@ public class TaskClasificacion extends Tarea {
 
     @Override
     public void run() {
-        if(super.tarea.getPropietario().equals("SCHEDULER")){
-            System.out.println("EJECUTANDO CLASIFICACION - "+LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-        }
-        
-        Thread.currentThread().setName("TaskClasificacion Thread");
-        Var.tasker.addTask(this);
-        setTitulo("CLASS");
-        setPorcentaje(0, 0);
-        setMensaje("Iniciando");
-        conectar();
-        setMensaje("Cargando Datos");
+        init();
+        initTarea();
         initData();
-
+        
         runSeleccion();
         runEntidad();
         runDescarte();
 
-        desconectar();
-        setMensaje("Finalizando");
-        Var.tasker.removeTask(this);
-        
-        if(super.tarea.getPropietario().equals("SCHEDULER")){
-            System.out.println("FINALIZADO CLASIFICACION - "+LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-        }
+        endTarea();
+    }
+
+    private void init() {
+        Thread.currentThread().setName("TaskClasificacion Thread");
+        setTitulo("CLASIFICACION");
+        setPorcentaje(0, 0);
+        setMensaje("Iniciando");
     }
 
     private void initData() {
+        setMensaje("Cargando Datos");
         try {
             entidad = bd.getStringList(queryEntidad);
             seleccion = bd.getStringList(querySeleccion);
@@ -74,7 +67,7 @@ public class TaskClasificacion extends Tarea {
     }
 
     private void runEntidad() {
-        setTitulo("CLASS Entidad");
+        setTitulo("CLASF Entidad");
         setMensaje("Iniciando");
         List<Publicacion> ex = new ArrayList();
         val = 1;
@@ -106,7 +99,7 @@ public class TaskClasificacion extends Tarea {
     }
 
     private void runSeleccion() {
-        setTitulo("CLASS Selección");
+        setTitulo("CLASF Selección");
         setMensaje("Iniciando");
         List<Publicacion> ex = new ArrayList();
         val = 1;
@@ -137,7 +130,7 @@ public class TaskClasificacion extends Tarea {
     }
 
     private void runDescarte() {
-        setTitulo("CLASS Descarte");
+        setTitulo("CLASF Descarte");
         setMensaje("Iniciando");
         List<Publicacion> ex = new ArrayList();
         val = 1;

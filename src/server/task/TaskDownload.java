@@ -6,6 +6,7 @@ import tools.LoadFile;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,7 +14,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,14 +33,14 @@ import tools.Util;
  */
 public class TaskDownload extends Tarea implements Runnable {
 
-    private final LocalDate fecha;
+    private LocalDate fecha;
     private final File pdf;
     private final File txt;
     private List<Publicacion> boe;
 
     public TaskDownload(ModeloTarea modeloTarea) {
         super(modeloTarea);
-        this.fecha = LocalDate.now();
+        this.fecha = null;
         pdf = new File(Var.fileSystem, "dwl.pdf");
         txt = new File(Var.fileSystem, "dwl.txt");
     }
@@ -50,79 +50,56 @@ public class TaskDownload extends Tarea implements Runnable {
         this.fecha = fecha;
         pdf = new File(Var.fileSystem, "dwl.pdf");
         txt = new File(Var.fileSystem, "dwl.txt");
-
     }
 
     @Override
     public void run() {
-        
-        if(super.tarea.getPropietario().equals("SCHEDULER")){
-            System.out.println("EJECUTANDO DOWNLOAD - "+LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-        }
-        
-        val = 1;
-        Thread.currentThread().setName("TaskDownload Thread");
-        Var.tasker.addTask(this);
-
-        try {
-            setTitulo("DOWNLOAD");
-            setMensaje("Iniciando");
-            setPorcentaje(0, 0);
-            conectar();
-
-            setMensaje("Preparando DB");
-            cleanDB();
-            setMensaje("Init BOE");
-            creaBoe();
-            setMensaje("Cargando BOE");
-            boe = splitUrl(getUrl(generaLink()));
-            setMensaje("Comprobando duplicados");
-            duplicados();
-            setMensaje("Descargando");
-
-            boe.stream().forEach((aux) -> {
-                status = val + " de " + boe.size();
-                status = status.replace(".0", "");
-                setPorcentaje(val, boe.size());
-
-                if (descarga(aux.getLink())) {
-                    setMensaje("Updating " + status);
-                    LoadFile lf = new LoadFile(txt);
-                    aux.setCve(getCve(lf.getLineas()));
-                    aux.setDatos(lf.getFileData());
-                } else {
-                    aux.setCve("No disponible");
-                    aux.setDatos("No disponible");
-                }
-
-                insert(aux);
-                val++;
-            });
-
-            desconectar();
-            clean();
-        } catch (Exception ex) {
-            setMensaje("Excepción");
-        }
-        Var.tasker.removeTask(this);
-        
-        if(super.tarea.getPropietario().equals("SCHEDULER")){
-            System.out.println("FINALIZADO DOWNLOAD - "+LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-        }
-        
+        init();
+        initTarea();
+        download();
+        endTarea();
         clasificacion();
     }
 
-    private void clasificacion() {
-        ModeloTarea mt = this.getModeloTarea();
-        mt.setTipoTarea(ServerTask.BOE_CLASIFICACION);
-        mt.setPropietario("SCHEDULER");
-        mt.setFechaInicio(LocalDateTime.now());
-        TaskClasificacion task = new TaskClasificacion(mt);
-        task.run();
+    private void init() {
+        if (this.fecha == null) {
+            this.fecha = LocalDate.now();
+        }
+
+        Thread.currentThread().setName("TaskDownload Thread");
+        setTitulo("DOWNLOAD");
+        setMensaje("Iniciando");
+        setPorcentaje(0, 0);
+        super.tarea.setParametros(this.fecha.format(DateTimeFormatter.ISO_DATE));
+    }
+
+    private void download() {
+        cleanDB();
+        initBoe();
+        duplicados();
+        setMensaje("Descargando");
+        boe.stream().forEach((aux) -> {
+            status = val + " de " + boe.size();
+            status = status.replace(".0", "");
+            setPorcentaje(val, boe.size());
+
+            if (descarga(aux.getLink())) {
+                LoadFile lf = new LoadFile(txt);
+                aux.setCve(getCve(lf.getLineas()));
+                aux.setDatos(lf.getFileData());
+            } else {
+                aux.setCve("No disponible");
+                aux.setDatos("No disponible");
+            }
+
+            insert(aux);
+            val++;
+        });
+        clean();
     }
 
     private void cleanDB() {
+        setMensaje("Preparando DB");
         try {
             String query = "DELETE from boes.boe where DATEDIFF(curdate(),fecha)> 10";
             bd.ejecutar(query);
@@ -131,13 +108,15 @@ public class TaskDownload extends Tarea implements Runnable {
         }
     }
 
-    private void creaBoe() {
+    private void initBoe() {
+        setMensaje("Init BOE");
         try {
-            String query = "INSERT IGNORE INTO boes.boe (fecha,link,isClas) VALUES (" + Util.comillas(fecha.format(DateTimeFormatter.ISO_DATE)) + "," + Util.comillas(generaLink()) + ",0);";
+            String query = "INSERT INTO boes.boe (fecha,link,isClas) VALUES (" + Util.comillas(fecha.format(DateTimeFormatter.ISO_DATE)) + "," + Util.comillas(generaLink()) + ",0);";
             bd.ejecutar(query);
         } catch (SQLException ex) {
-            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+//            System.out.println("Excepción en TaskDownload.creaBoe();" + ex.getMessage());
         }
+        boe = splitUrl(getUrl(generaLink()));
     }
 
     private void clean() {
@@ -146,8 +125,18 @@ public class TaskDownload extends Tarea implements Runnable {
         txt.delete();
     }
 
+    private void clasificacion() {
+        ModeloTarea mt = this.getModeloTarea();
+        mt.setTipoTarea(ServerTask.BOE_CLASIFICACION);
+        mt.setPropietario(super.tarea.getPropietario());
+        mt.setParametros("-");
+        TaskClasificacion task = new TaskClasificacion(mt);
+        task.run();
+    }
+
     //<editor-fold defaultstate="collapsed" desc="GET URL">
     private String generaLink() {
+        setMensaje("Cargando BOE");
         return "http://boe.es/boe_n/dias/" + fecha.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/"));
     }
 
@@ -177,6 +166,8 @@ public class TaskDownload extends Tarea implements Runnable {
             }
         } catch (MalformedURLException ex) {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+//            Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(TaskDownload.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -240,7 +231,6 @@ public class TaskDownload extends Tarea implements Runnable {
         try {
             setMensaje("Downloading " + status);
             tools.Download.downloadFILE(link, pdf);
-            setMensaje("Parsing " + status);
             convertPDF(pdf, txt);
             return true;
         } catch (Exception ex) {
@@ -296,6 +286,7 @@ public class TaskDownload extends Tarea implements Runnable {
 
     //<editor-fold defaultstate="collapsed" desc="INSERCIÓN EN DB">
     private void duplicados() {
+        setMensaje("Comprobando duplicados");
         try {
             Publicacion aux;
             List clear = new ArrayList();

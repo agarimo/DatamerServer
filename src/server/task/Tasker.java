@@ -1,12 +1,7 @@
 package server.task;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -17,7 +12,6 @@ import java.util.stream.Collectors;
 import server.Var;
 import socket.enty.ModeloTarea;
 import socket.enty.ServerTask;
-import tools.Util;
 
 /**
  *
@@ -25,14 +19,14 @@ import tools.Util;
  */
 public class Tasker {
 
-    private static int idCount;
+//    private static int idCount;
     private boolean run;
     private ExecutorService clientExecutor;
     private ScheduledExecutorService scheduledExecutor;
     private List<Tarea> running_task;
 
     public Tasker() {
-        idCount = 1;
+//        idCount = 1;
         run = false;
         clientExecutor = Executors.newFixedThreadPool(8);
         scheduledExecutor = Executors.newScheduledThreadPool(6);
@@ -57,12 +51,12 @@ public class Tasker {
         mt.setPropietario("SCHEDULER");
         mt.setTipoTarea(ServerTask.BOE);
         TaskDownload task = new TaskDownload(mt);
-        
         long initDelay = computeDelay();
+
         scheduledExecutor.scheduleAtFixedRate(task, initDelay, Var.delayExec, TimeUnit.SECONDS);
     }
-    
-    private long computeDelay(){
+
+    private long computeDelay() {
         long ahora = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
         long futuro = LocalDateTime.now().plusDays(1).withHour(Var.horaExec).withMinute(Var.minExec).toEpochSecond(ZoneOffset.UTC);
         return futuro - ahora;
@@ -134,15 +128,15 @@ public class Tasker {
     }
 
     private void runBoe(ModeloTarea tarea) {
-        tarea.setId(idCount);
-        idCount++;
+//        tarea.setId(idCount);
+//        idCount++;
         TaskDownload task = new TaskDownload(tarea);
         scheduledExecutor.execute(task);
     }
 
     private void runBoeClasificacion(ModeloTarea tarea) {
-        tarea.setId(idCount);
-        idCount++;
+//        tarea.setId(idCount);
+//        idCount++;
         TaskClasificacion task = new TaskClasificacion(tarea);
         scheduledExecutor.execute(task);
     }
