@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -21,14 +20,12 @@ public class Tasker {
 
 //    private static int idCount;
     private boolean run;
-    private ExecutorService clientExecutor;
     private ScheduledExecutorService scheduledExecutor;
     private List<Tarea> running_task;
 
     public Tasker() {
 //        idCount = 1;
         run = false;
-        clientExecutor = Executors.newFixedThreadPool(8);
         scheduledExecutor = Executors.newScheduledThreadPool(6);
         running_task = new ArrayList();
         run = true;
@@ -40,10 +37,6 @@ public class Tasker {
 
     public ScheduledExecutorService getScheduledExecutor() {
         return scheduledExecutor;
-    }
-
-    public ExecutorService getClientExecutor() {
-        return clientExecutor;
     }
 
     public void sheduledTask() {
@@ -64,7 +57,6 @@ public class Tasker {
 
     public void shutdown() {
         scheduledExecutor.shutdownNow();
-        clientExecutor.shutdownNow();
         run = false;
     }
 
