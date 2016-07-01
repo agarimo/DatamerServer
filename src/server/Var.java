@@ -9,8 +9,8 @@ import java.io.OutputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import server.socket.SkServer;
 import server.task.Tasker;
-import socket.SkServer;
 import sql.Conexion;
 
 /**
