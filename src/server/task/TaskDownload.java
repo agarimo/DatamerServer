@@ -62,7 +62,7 @@ public class TaskDownload extends Tarea implements Runnable {
     }
 
     private void init() {
-        if (this.fecha == null) {
+        if (this.fecha == null || tarea.getPropietario().equalsIgnoreCase("SCHEDULER")) {
             this.fecha = LocalDate.now();
         }
 
@@ -70,13 +70,14 @@ public class TaskDownload extends Tarea implements Runnable {
         setTitulo("DOWNLOAD");
         setMensaje("Iniciando");
         setPorcentaje(0, 0);
-        super.tarea.setParametros(this.fecha.format(DateTimeFormatter.ISO_DATE));
+        tarea.setParametros(this.fecha.format(DateTimeFormatter.ISO_DATE));
     }
 
     private void download() {
         cleanDB();
         initBoe();
         duplicados();
+        
         setMensaje("Descargando");
         boe.stream().forEach((aux) -> {
             status = val + " de " + boe.size();
