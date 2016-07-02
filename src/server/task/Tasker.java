@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import server.Var;
+import socket.enty.ModelTask;
 import socket.enty.ModeloTarea;
 import socket.enty.ServerTask;
 
@@ -101,7 +102,17 @@ public class Tasker {
         return answer;
     }
 
-    public synchronized List<ModeloTarea> getStatus() {
+    public synchronized List<ModelTask> getStatus() {
+        List<ModelTask> list = new ArrayList();
+
+        running_task.stream().forEach((aux) -> {
+            list.add(new ModelTask(aux.getModeloTarea()));
+        });
+
+        return list;
+    }
+    
+    public synchronized List<ModeloTarea> getStatusLocal() {
         List<ModeloTarea> list = new ArrayList();
 
         running_task.stream().forEach((aux) -> {

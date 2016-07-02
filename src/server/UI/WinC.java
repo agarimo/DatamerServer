@@ -142,7 +142,7 @@ public class WinC implements Initializable {
         Runnable refresh = () -> {
             Thread.currentThread().setName("Refresh Thread");
             while (Var.keepRefresh) {
-                List<ModeloTarea> aux = Var.tasker.getStatus();
+                List<ModeloTarea> aux = Var.tasker.getStatusLocal();
 
                 Platform.runLater(() -> {
                     tareas.clear();
