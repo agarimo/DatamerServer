@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import server.Var;
+import socket.enty.ModelTask;
 import socket.enty.ModeloTarea;
 import socket.enty.Request;
 import socket.enty.Response;
@@ -88,7 +89,8 @@ public class SocketCon implements Runnable {
                 break;
 
             case RUN_TASK:
-                task = (ModeloTarea) request.getParametros().get(0);
+                ModelTask mt= (ModelTask) request.getParametros().get(0);
+                task = mt.toModeloTarea();
 
                 if (Var.tasker.runTask(task)) {
                     response = new Response(ServerResponse.OK);

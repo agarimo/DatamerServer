@@ -131,15 +131,11 @@ public class Tasker {
     }
 
     private void runBoe(ModeloTarea tarea) {
-//        tarea.setId(idCount);
-//        idCount++;
         TaskDownload task = new TaskDownload(tarea);
         scheduledExecutor.execute(task);
     }
 
     private void runBoeClasificacion(ModeloTarea tarea) {
-//        tarea.setId(idCount);
-//        idCount++;
         TaskClasificacion task = new TaskClasificacion(tarea);
         scheduledExecutor.execute(task);
     }
