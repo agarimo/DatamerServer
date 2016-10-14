@@ -48,7 +48,11 @@ public class SkServer implements Runnable {
         Request request = new Request(ServerRequest.DISCONECT);
         Response sr;
         ClientSocket cs = new ClientSocket();
-        cs.conect();
+        try {
+            cs.conect();
+        } catch (IOException | ClassNotFoundException ex) {
+            Logger.getLogger(SkServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
         sr = cs.sendRequest(request);
         System.out.println(sr.getResponse());
 

@@ -40,14 +40,15 @@ public class TaskDownload extends Tarea implements Runnable {
 
     public TaskDownload(ModeloTarea modeloTarea) {
         super(modeloTarea);
-        this.fecha = null;
-        pdf = new File(Var.fileSystem, "dwl.pdf");
-        txt = new File(Var.fileSystem, "dwl.txt");
-    }
 
-    public TaskDownload(ModeloTarea modeloTarea, LocalDate fecha) {
-        super(modeloTarea);
-        this.fecha = fecha;
+        if (modeloTarea.getParametros() != null) {
+            this.fecha = LocalDate.parse(modeloTarea.getParametros());
+            System.out.println(this.fecha.format(DateTimeFormatter.ISO_DATE));
+        } else {
+            this.fecha = null;
+        }
+        
+
         pdf = new File(Var.fileSystem, "dwl.pdf");
         txt = new File(Var.fileSystem, "dwl.txt");
     }
@@ -77,7 +78,7 @@ public class TaskDownload extends Tarea implements Runnable {
         cleanDB();
         initBoe();
         duplicados();
-        
+
         setMensaje("Descargando");
         boe.stream().forEach((aux) -> {
             status = val + " de " + boe.size();
