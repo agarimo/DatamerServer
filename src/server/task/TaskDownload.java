@@ -139,7 +139,7 @@ public class TaskDownload extends Tarea implements Runnable {
     //<editor-fold defaultstate="collapsed" desc="GET URL">
     private String generaLink() {
         setMensaje("Cargando BOE");
-        return "http://boe.es/boe_n/dias/" + fecha.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/"));
+        return "https://boe.es/boe_n/dias/" + fecha.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/"));
     }
 
     private String getUrl(String url) {
