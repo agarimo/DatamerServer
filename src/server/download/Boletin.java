@@ -14,7 +14,7 @@ public class Boletin {
     private String entidad;
     private String origen;
 
-    private final String preLink = "http://www.boe.es";
+    private final String preLink = "https://www.boe.es";
     private final List<Publicacion> list;
 
     public Boletin(LocalDate fecha) {
