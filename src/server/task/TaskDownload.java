@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import server.Var;
+import static server.Var.NEW_LINE;
 import server.download.Boletin;
 import server.download.Publicacion;
 import socket.enty.ModeloTarea;
@@ -33,6 +36,14 @@ import tools.Util;
  */
 public class TaskDownload extends Tarea implements Runnable {
 
+    private static final String PRE_BOE_LINK = "https://boe.es/boe_n/dias/";
+    private static final String POST_BOE_LINK = "/index.php?l=N";
+    private static final String GET_URL_FILTER_INIT = "<div class=\"sumario\">";
+    private static final String GET_URL_FILTER_END = "</div> <!-- #indiceSumario -->";
+    
+    private static final String FECHA_FORMAT = "yyyy/MM/dd/";
+
+    
     private LocalDate fecha;
     private final File pdf;
     private final File txt;
@@ -47,7 +58,6 @@ public class TaskDownload extends Tarea implements Runnable {
         } else {
             this.fecha = null;
         }
-        
 
         pdf = new File(Var.fileSystem, "dwl.pdf");
         txt = new File(Var.fileSystem, "dwl.txt");
@@ -60,6 +70,7 @@ public class TaskDownload extends Tarea implements Runnable {
         download();
         endTarea();
         clasificacion();
+        System.exit(0);
     }
 
     private void init() {
@@ -139,7 +150,7 @@ public class TaskDownload extends Tarea implements Runnable {
     //<editor-fold defaultstate="collapsed" desc="GET URL">
     private String generaLink() {
         setMensaje("Cargando BOE");
-        return "https://boe.es/boe_n/dias/" + fecha.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/"));
+        return PRE_BOE_LINK + fecha.format(DateTimeFormatter.ofPattern(FECHA_FORMAT)) + POST_BOE_LINK;
     }
 
     private String getUrl(String url) {
@@ -149,20 +160,20 @@ public class TaskDownload extends Tarea implements Runnable {
 
         try {
             URL enl = new URL(url);
-            BufferedReader in = new BufferedReader(new InputStreamReader(enl.openStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(enl.openStream(),"UTF-8"));
 
             while ((inputLine = in.readLine()) != null) {
-
-                if (inputLine.contains("<div class=\"SumarioNotif\">")) {
+                
+                if (inputLine.contains(GET_URL_FILTER_INIT)) {
                     print = true;
                 }
 
                 if (print) {
                     buffer.append(inputLine);
-                    buffer.append(System.getProperty("line.separator"));
+                    buffer.append(NEW_LINE);
                 }
 
-                if (inputLine.contains("<div class=\"espacio\">")) {
+                if (inputLine.contains(GET_URL_FILTER_END)) {
                     print = false;
                 }
             }
@@ -176,7 +187,7 @@ public class TaskDownload extends Tarea implements Runnable {
 
         return buffer.toString();
     }
-
+    
     private List splitUrl(String datos) {
         List aux = new ArrayList();
         Boletin boletin = new Boletin(this.fecha);
@@ -187,9 +198,11 @@ public class TaskDownload extends Tarea implements Runnable {
         StringBuilder sb2 = new StringBuilder();
         String[] split;
 
-        split = datos.split(System.getProperty("line.separator"));
+        split = datos.split(NEW_LINE);
 
         for (String a1 : split) {
+            
+            System.out.println(a1);
 
             if (a1.contains("<h5>")) {
                 printP = true;
@@ -197,7 +210,7 @@ public class TaskDownload extends Tarea implements Runnable {
 
             if (printP) {
                 sb2.append(a1);
-                sb2.append(System.getProperty("line.separator"));
+                sb2.append(NEW_LINE);
             }
 
             if (a1.contains("</h5>")) {
@@ -212,7 +225,7 @@ public class TaskDownload extends Tarea implements Runnable {
 
             if (print) {
                 sb1.append(a1);
-                sb1.append(System.getProperty("line.separator"));
+                sb1.append(NEW_LINE);
             }
 
             if (a1.contains("</ul>")) {

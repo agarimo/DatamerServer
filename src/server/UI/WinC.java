@@ -197,6 +197,7 @@ public class WinC implements Initializable {
         ModeloTarea mt = new ModeloTarea();
         mt.setPropietario("SERVER");
         mt.setTipoTarea(ServerTask.BOE);
+        mt.setParametros("2019-06-20");
 
         Var.tasker.runTask(mt);
     }

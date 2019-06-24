@@ -6,7 +6,7 @@
 <entry key="con_port">3306</entry>
 <entry key="dbName">server</entry>
 <entry key="con_pass">IkuinenK@@m.s84</entry>
-<entry key="con_host">localhost</entry>
+<entry key="con_host">192.168.1.10</entry>
 <entry key="server_port">10987</entry>
 <!--- HORA y MINUTO de ejecución programada  -->
 <entry key="hora_exec">8</entry>

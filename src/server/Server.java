@@ -1,6 +1,7 @@
 package server;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -19,7 +20,7 @@ public class Server extends Application {
 
     private static Stage stage;
     private Parent root;
-
+    
     @Override
     public void init() throws IOException {
         Var.initVar();

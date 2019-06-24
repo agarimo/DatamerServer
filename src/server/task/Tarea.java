@@ -15,7 +15,7 @@ import sql.Sql;
  * @author Agárimo
  */
 public class Tarea implements Runnable {
-
+    
     protected String titulo;
     protected String mensaje;
     protected double porcentaje;
