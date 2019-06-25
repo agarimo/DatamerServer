@@ -19,6 +19,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
+import server.Server;
 import server.Var;
 import socket.enty.ModeloTarea;
 import socket.enty.ServerTask;
@@ -60,6 +61,10 @@ public class WinC implements Initializable {
         initStatus();
         initTable();
         initRefresh();
+        
+        if(Server.AUTO){
+            runAutoDownload();
+        }
     }
 
     public void initTable() {
@@ -197,7 +202,6 @@ public class WinC implements Initializable {
         ModeloTarea mt = new ModeloTarea();
         mt.setPropietario("SERVER");
         mt.setTipoTarea(ServerTask.BOE);
-        mt.setParametros("2019-06-20");
 
         Var.tasker.runTask(mt);
     }
@@ -205,6 +209,15 @@ public class WinC implements Initializable {
     @FXML
     void close(ActionEvent event) {
         server.Server.shutdown();
+    }
+    
+    void runAutoDownload() {
+        ModeloTarea mt = new ModeloTarea();
+        mt.setPropietario("SERVER");
+        mt.setTipoTarea(ServerTask.BOE);
+        mt.setParametros(Var.AUTO_DATE);
+
+        Var.tasker.runTask(mt);
     }
 
 }

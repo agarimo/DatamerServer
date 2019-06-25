@@ -1,7 +1,6 @@
 package server;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -18,6 +17,7 @@ import javafx.stage.WindowEvent;
  */
 public class Server extends Application {
 
+    public static boolean AUTO = false;
     private static Stage stage;
     private Parent root;
     
@@ -55,6 +55,12 @@ public class Server extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        if(args.length!=0){
+            AUTO=true;
+            Var.AUTO_DATE=args[0];
+        }
+        
         launch(args);
     }
 

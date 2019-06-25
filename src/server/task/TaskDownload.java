@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -22,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import server.Server;
 import server.Var;
 import static server.Var.NEW_LINE;
 import server.download.Boletin;
@@ -40,10 +39,8 @@ public class TaskDownload extends Tarea implements Runnable {
     private static final String POST_BOE_LINK = "/index.php?l=N";
     private static final String GET_URL_FILTER_INIT = "<div class=\"sumario\">";
     private static final String GET_URL_FILTER_END = "</div> <!-- #indiceSumario -->";
-    
     private static final String FECHA_FORMAT = "yyyy/MM/dd/";
 
-    
     private LocalDate fecha;
     private final File pdf;
     private final File txt;
@@ -70,7 +67,11 @@ public class TaskDownload extends Tarea implements Runnable {
         download();
         endTarea();
         clasificacion();
-        System.exit(0);
+
+        if (Server.AUTO) {
+            System.out.println("DESCARGA AUTOMATICA TERMINADA");
+            System.exit(0);
+        }
     }
 
     private void init() {
@@ -160,10 +161,10 @@ public class TaskDownload extends Tarea implements Runnable {
 
         try {
             URL enl = new URL(url);
-            BufferedReader in = new BufferedReader(new InputStreamReader(enl.openStream(),"UTF-8"));
+            BufferedReader in = new BufferedReader(new InputStreamReader(enl.openStream(), "UTF-8"));
 
             while ((inputLine = in.readLine()) != null) {
-                
+
                 if (inputLine.contains(GET_URL_FILTER_INIT)) {
                     print = true;
                 }
@@ -187,7 +188,7 @@ public class TaskDownload extends Tarea implements Runnable {
 
         return buffer.toString();
     }
-    
+
     private List splitUrl(String datos) {
         List aux = new ArrayList();
         Boletin boletin = new Boletin(this.fecha);
@@ -201,8 +202,6 @@ public class TaskDownload extends Tarea implements Runnable {
         split = datos.split(NEW_LINE);
 
         for (String a1 : split) {
-            
-            System.out.println(a1);
 
             if (a1.contains("<h5>")) {
                 printP = true;
